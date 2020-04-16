@@ -130,7 +130,6 @@ public class WaystoneListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onInteract(PlayerInteractEntityEvent e) {
-		//TODO: Add sound and particle effects
 		ItemStack itemInMainHand = e.getPlayer().getInventory().getItemInMainHand();
 		ItemStack itemInOffHand = e.getPlayer().getInventory().getItemInOffHand();
 
@@ -254,42 +253,7 @@ public class WaystoneListener implements Listener {
 				ArrayList<DyeColor> colors = new ArrayList(Arrays.asList(DyeColor.values()));
 				colors.add(null);
 				for (DyeColor c : colors) {
-					ItemStack col;
-					if (c == DyeColor.WHITE) {
-						col = new ItemStack(Material.WHITE_SHULKER_BOX);
-					} else if (c == DyeColor.ORANGE) {
-						col = new ItemStack(Material.ORANGE_SHULKER_BOX);
-					} else if (c == DyeColor.MAGENTA) {
-						col = new ItemStack(Material.MAGENTA_SHULKER_BOX);
-					} else if (c == DyeColor.LIGHT_BLUE) {
-						col = new ItemStack(Material.LIGHT_BLUE_SHULKER_BOX);
-					} else if (c == DyeColor.YELLOW) {
-						col = new ItemStack(Material.YELLOW_SHULKER_BOX);
-					} else if (c == DyeColor.LIME) {
-						col = new ItemStack(Material.LIME_SHULKER_BOX);
-					} else if (c == DyeColor.PINK) {
-						col = new ItemStack(Material.PINK_SHULKER_BOX);
-					} else if (c == DyeColor.GRAY) {
-						col = new ItemStack(Material.GRAY_SHULKER_BOX);
-					} else if (c == DyeColor.LIGHT_GRAY) {
-						col = new ItemStack(Material.LIGHT_GRAY_SHULKER_BOX);
-					} else if (c == DyeColor.CYAN) {
-						col = new ItemStack(Material.CYAN_SHULKER_BOX);
-					} else if (c == DyeColor.PURPLE) {
-						col = new ItemStack(Material.PURPLE_SHULKER_BOX);
-					} else if (c == DyeColor.BLUE) {
-						col = new ItemStack(Material.BLUE_SHULKER_BOX);
-					} else if (c == DyeColor.BROWN) {
-						col = new ItemStack(Material.BROWN_SHULKER_BOX);
-					} else if (c == DyeColor.GREEN) {
-						col = new ItemStack(Material.GREEN_SHULKER_BOX);
-					} else if (c == DyeColor.RED) {
-						col = new ItemStack(Material.RED_SHULKER_BOX);
-					} else if (c == DyeColor.BLACK) {
-						col = new ItemStack(Material.BLACK_SHULKER_BOX);
-					} else {
-						col = new ItemStack(Material.SHULKER_BOX);
-					}
+					ItemStack col = WaystoneManager.getInstance().getShulkerboxFromColor(c);
 					meta = col.getItemMeta();
 					if (c != null) meta.setDisplayName(c.name());
 					else meta.setDisplayName("NORMAL");
@@ -387,42 +351,7 @@ public class WaystoneListener implements Listener {
 					if (item == null) continue;
 					if (item.equals(waystone)) continue;
 
-					ItemStack stack;
-					if (item.color == DyeColor.WHITE) {
-						stack = new ItemStack(Material.WHITE_SHULKER_BOX);
-					} else if (item.color == DyeColor.ORANGE) {
-						stack = new ItemStack(Material.ORANGE_SHULKER_BOX);
-					} else if (item.color == DyeColor.MAGENTA) {
-						stack = new ItemStack(Material.MAGENTA_SHULKER_BOX);
-					} else if (item.color == DyeColor.LIGHT_BLUE) {
-						stack = new ItemStack(Material.LIGHT_BLUE_SHULKER_BOX);
-					} else if (item.color == DyeColor.YELLOW) {
-						stack = new ItemStack(Material.YELLOW_SHULKER_BOX);
-					} else if (item.color == DyeColor.LIME) {
-						stack = new ItemStack(Material.LIME_SHULKER_BOX);
-					} else if (item.color == DyeColor.PINK) {
-						stack = new ItemStack(Material.PINK_SHULKER_BOX);
-					} else if (item.color == DyeColor.GRAY) {
-						stack = new ItemStack(Material.GRAY_SHULKER_BOX);
-					} else if (item.color == DyeColor.LIGHT_GRAY) {
-						stack = new ItemStack(Material.LIGHT_GRAY_SHULKER_BOX);
-					} else if (item.color == DyeColor.CYAN) {
-						stack = new ItemStack(Material.CYAN_SHULKER_BOX);
-					} else if (item.color == DyeColor.PURPLE) {
-						stack = new ItemStack(Material.PURPLE_SHULKER_BOX);
-					} else if (item.color == DyeColor.BLUE) {
-						stack = new ItemStack(Material.BLUE_SHULKER_BOX);
-					} else if (item.color == DyeColor.BROWN) {
-						stack = new ItemStack(Material.BROWN_SHULKER_BOX);
-					} else if (item.color == DyeColor.GREEN) {
-						stack = new ItemStack(Material.GREEN_SHULKER_BOX);
-					} else if (item.color == DyeColor.RED) {
-						stack = new ItemStack(Material.RED_SHULKER_BOX);
-					} else if (item.color == DyeColor.BLACK) {
-						stack = new ItemStack(Material.BLACK_SHULKER_BOX);
-					} else {
-						stack = new ItemStack(Material.SHULKER_BOX);
-					}
+					ItemStack stack = WaystoneManager.getInstance().getShulkerboxFromColor(item.color);
 					ItemMeta meta = stack.getItemMeta();
 					meta.setDisplayName(item.Name);
 					List<String> lore = new ArrayList<>();
@@ -458,7 +387,17 @@ public class WaystoneListener implements Listener {
 						int finalCost = cost;
 						but.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE_ON_PLAYER(but, (p, s) -> {
 							if (p.getGameMode() != GameMode.CREATIVE) p.giveExp(-finalCost);
-							p.teleport(new Location(Bukkit.getWorld(item.worldname), item.x, item.y + 1, item.z));
+							Location loc = new Location(Bukkit.getWorld(item.worldname), item.x, item.y + 1, item.z);
+							if (Main.plugin.getConfig().getBoolean("EnvironmentEffects", true)) {
+								p.getLocation().getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+								p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+								p.getLocation().getWorld().spawnParticle(Particle.PORTAL, p.getLocation(), 128);
+							}
+							p.teleport(loc);
+							if (Main.plugin.getConfig().getBoolean("EnvironmentEffects", true)) {
+								loc.getWorld().playSound(loc, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+								loc.getWorld().spawnParticle(Particle.PORTAL, loc, 128);
+							}
 						}));
 					}
 					index++;

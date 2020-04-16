@@ -45,7 +45,6 @@ public class WarpscrollListener implements Listener {
 
 	@EventHandler //Cannot set ignorecancelled
 	public void onInteract(PlayerInteractEvent e) {
-		//TODO: Add sound and particle effects
 		//TODO: Make Teleport Time
 		if (e.getAction() != Action.RIGHT_CLICK_AIR) return;
 
@@ -124,42 +123,7 @@ public class WarpscrollListener implements Listener {
 				wslist.remove(0);
 				if (item == null) continue;
 
-				ItemStack stack;
-				if (item.color == DyeColor.WHITE) {
-					stack = new ItemStack(Material.WHITE_SHULKER_BOX);
-				} else if (item.color == DyeColor.ORANGE) {
-					stack = new ItemStack(Material.ORANGE_SHULKER_BOX);
-				} else if (item.color == DyeColor.MAGENTA) {
-					stack = new ItemStack(Material.MAGENTA_SHULKER_BOX);
-				} else if (item.color == DyeColor.LIGHT_BLUE) {
-					stack = new ItemStack(Material.LIGHT_BLUE_SHULKER_BOX);
-				} else if (item.color == DyeColor.YELLOW) {
-					stack = new ItemStack(Material.YELLOW_SHULKER_BOX);
-				} else if (item.color == DyeColor.LIME) {
-					stack = new ItemStack(Material.LIME_SHULKER_BOX);
-				} else if (item.color == DyeColor.PINK) {
-					stack = new ItemStack(Material.PINK_SHULKER_BOX);
-				} else if (item.color == DyeColor.GRAY) {
-					stack = new ItemStack(Material.GRAY_SHULKER_BOX);
-				} else if (item.color == DyeColor.LIGHT_GRAY) {
-					stack = new ItemStack(Material.LIGHT_GRAY_SHULKER_BOX);
-				} else if (item.color == DyeColor.CYAN) {
-					stack = new ItemStack(Material.CYAN_SHULKER_BOX);
-				} else if (item.color == DyeColor.PURPLE) {
-					stack = new ItemStack(Material.PURPLE_SHULKER_BOX);
-				} else if (item.color == DyeColor.BLUE) {
-					stack = new ItemStack(Material.BLUE_SHULKER_BOX);
-				} else if (item.color == DyeColor.BROWN) {
-					stack = new ItemStack(Material.BROWN_SHULKER_BOX);
-				} else if (item.color == DyeColor.GREEN) {
-					stack = new ItemStack(Material.GREEN_SHULKER_BOX);
-				} else if (item.color == DyeColor.RED) {
-					stack = new ItemStack(Material.RED_SHULKER_BOX);
-				} else if (item.color == DyeColor.BLACK) {
-					stack = new ItemStack(Material.BLACK_SHULKER_BOX);
-				} else {
-					stack = new ItemStack(Material.SHULKER_BOX);
-				}
+				ItemStack stack = WaystoneManager.getInstance().getShulkerboxFromColor(item.color);
 				ItemMeta meta = stack.getItemMeta();
 				meta.setDisplayName(item.Name);
 				List<String> lore = new ArrayList<>();
@@ -187,7 +151,7 @@ public class WarpscrollListener implements Listener {
 					color = ChatColor.RED;
 				}
 				lore.add(ChatColor.WHITE + "Distance: " + distance + " Blocks");
-				lore.add(color + "XP-Cost to teleport: " + cost + "XP");
+				if (cost > 0) lore.add(color + "XP-Cost to teleport: " + cost + "XP");
 				meta.setLore(lore);
 				stack.setItemMeta(meta);
 
@@ -196,8 +160,18 @@ public class WarpscrollListener implements Listener {
 					int finalCost = cost;
 					but.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE_ON_PLAYER(but, (p, s) -> {
 						if (p.getGameMode() != GameMode.CREATIVE) p.giveExp(-finalCost);
-						p.teleport(new Location(Bukkit.getWorld(item.worldname), item.x, item.y + 1, item.z));
+						Location location = new Location(Bukkit.getWorld(item.worldname), item.x, item.y + 1, item.z);
+						if (Main.plugin.getConfig().getBoolean("EnvironmentEffects", true)) {
+							p.getLocation().getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+							p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+							p.getLocation().getWorld().spawnParticle(Particle.PORTAL, p.getLocation(), 128);
+						}
+						p.teleport(location);
 						cooldowns.put(p.getUniqueId().toString(), System.currentTimeMillis());
+						if (Main.plugin.getConfig().getBoolean("EnvironmentEffects", true)) {
+							location.getWorld().playSound(location, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+							location.getWorld().spawnParticle(Particle.PORTAL, location, 128);
+						}
 					}));
 				}
 				index++;

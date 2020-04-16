@@ -1,7 +1,10 @@
 package de.flo56958.waystones;
 
 import com.google.gson.Gson;
+import org.bukkit.DyeColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.*;
 import java.util.*;
@@ -171,5 +174,46 @@ public class WaystoneManager {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public ItemStack getShulkerboxFromColor(DyeColor color) {
+		ItemStack stack;
+		if (color == DyeColor.WHITE) {
+			stack = new ItemStack(Material.WHITE_SHULKER_BOX);
+		} else if (color == DyeColor.ORANGE) {
+			stack = new ItemStack(Material.ORANGE_SHULKER_BOX);
+		} else if (color == DyeColor.MAGENTA) {
+			stack = new ItemStack(Material.MAGENTA_SHULKER_BOX);
+		} else if (color == DyeColor.LIGHT_BLUE) {
+			stack = new ItemStack(Material.LIGHT_BLUE_SHULKER_BOX);
+		} else if (color == DyeColor.YELLOW) {
+			stack = new ItemStack(Material.YELLOW_SHULKER_BOX);
+		} else if (color == DyeColor.LIME) {
+			stack = new ItemStack(Material.LIME_SHULKER_BOX);
+		} else if (color == DyeColor.PINK) {
+			stack = new ItemStack(Material.PINK_SHULKER_BOX);
+		} else if (color == DyeColor.GRAY) {
+			stack = new ItemStack(Material.GRAY_SHULKER_BOX);
+		} else if (color == DyeColor.LIGHT_GRAY) {
+			stack = new ItemStack(Material.LIGHT_GRAY_SHULKER_BOX);
+		} else if (color == DyeColor.CYAN) {
+			stack = new ItemStack(Material.CYAN_SHULKER_BOX);
+		} else if (color == DyeColor.PURPLE) {
+			stack = new ItemStack(Material.PURPLE_SHULKER_BOX);
+		} else if (color == DyeColor.BLUE) {
+			stack = new ItemStack(Material.BLUE_SHULKER_BOX);
+		} else if (color == DyeColor.BROWN) {
+			stack = new ItemStack(Material.BROWN_SHULKER_BOX);
+		} else if (color == DyeColor.GREEN) {
+			stack = new ItemStack(Material.GREEN_SHULKER_BOX);
+		} else if (color == DyeColor.RED) {
+			stack = new ItemStack(Material.RED_SHULKER_BOX);
+		} else if (color == DyeColor.BLACK) {
+			stack = new ItemStack(Material.BLACK_SHULKER_BOX);
+		} else {
+			stack = new ItemStack(Material.SHULKER_BOX);
+		}
+
+		return stack;
 	}
 }
