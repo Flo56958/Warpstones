@@ -1,5 +1,6 @@
 package de.flo56958.waystones;
 
+import de.flo56958.waystones.Listeners.CraftingGridListener;
 import de.flo56958.waystones.Listeners.WarpscrollListener;
 import de.flo56958.waystones.Listeners.WaystoneListener;
 import de.flo56958.waystones.Listeners.WorldSaveListener;
@@ -9,6 +10,8 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
@@ -59,30 +62,48 @@ public final class Main extends JavaPlugin {
 		//Setting up Listeners
 		Bukkit.getPluginManager().registerEvents(new WaystoneListener(), this);
 		Bukkit.getPluginManager().registerEvents(new WorldSaveListener(), this);
-		Bukkit.getPluginManager().registerEvents(new WarpscrollListener(), this);
+		Bukkit.getPluginManager().registerEvents(new CraftingGridListener(), this);
 
 		//Setting up Crafting recipe
-		//TODO: Change recipe
+		FileConfiguration config = this.getConfig();
 		try {
-			NamespacedKey nkey = new NamespacedKey(this, "Waystone");
-			ShapedRecipe newRecipe = new ShapedRecipe(nkey, waystoneItem); //init recipe
+			NamespacedKey nkey = new NamespacedKey(Main.plugin, "Waystone");
+			ShapedRecipe newRecipe = new ShapedRecipe(nkey, waystoneItem);
+			String top = config.getString("WaystoneRecipe.Top");
+			String middle = config.getString("WaystoneRecipe.Middle");
+			String bottom = config.getString("WaystoneRecipe.Bottom");
+			ConfigurationSection materials = config.getConfigurationSection("WaystoneRecipe.Materials");
 
-			newRecipe.shape("   ", " S ", "   "); //makes recipe
-			newRecipe.setIngredient('S', Material.SHULKER_SHELL);
-			this.getServer().addRecipe(newRecipe); //adds recipe
+			newRecipe.shape(top, middle, bottom);
+
+			for (String key : materials.getKeys(false)) {
+				newRecipe.setIngredient(key.charAt(0), Material.getMaterial(materials.getString(key)));
+			}
+
+			this.getServer().addRecipe(newRecipe);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		if (config.getBoolean("Warpscroll.Enabled", true)) {
+			Bukkit.getPluginManager().registerEvents(new WarpscrollListener(), this);
+			try {
+				NamespacedKey nkey = new NamespacedKey(Main.plugin, "Warpscroll");
+				ShapedRecipe newRecipe = new ShapedRecipe(nkey, warpscrollItem);
+				String top = config.getString("Warpscroll.Recipe.Top");
+				String middle = config.getString("Warpscroll.Recipe.Middle");
+				String bottom = config.getString("Warpscroll.Recipe.Bottom");
+				ConfigurationSection materials = config.getConfigurationSection("Warpscroll.Recipe.Materials");
 
-		try {
-			NamespacedKey nkey = new NamespacedKey(this, "Warpscroll");
-			ShapedRecipe newRecipe = new ShapedRecipe(nkey, warpscrollItem); //init recipe
+				newRecipe.shape(top, middle, bottom);
 
-			newRecipe.shape("   ", " P ", "   "); //makes recipe
-			newRecipe.setIngredient('P', Material.PAPER);
-			this.getServer().addRecipe(newRecipe); //adds recipe
-		} catch (Exception e) {
-			e.printStackTrace();
+				for (String key : materials.getKeys(false)) {
+					newRecipe.setIngredient(key.charAt(0), Material.getMaterial(materials.getString(key)));
+				}
+
+				this.getServer().addRecipe(newRecipe);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

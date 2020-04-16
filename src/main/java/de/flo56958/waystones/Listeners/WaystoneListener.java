@@ -49,7 +49,7 @@ public class WaystoneListener implements Listener {
 
 	private final HashMap<String, Long> playerInteractTimer = new HashMap<>();
 
-	@EventHandler
+	@EventHandler (priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onPlace(PlayerInteractEvent e) {
 		if (e.getClickedBlock() == null) return;
 		if (e.getAction() != Action.RIGHT_CLICK_BLOCK) return;
@@ -62,6 +62,8 @@ public class WaystoneListener implements Listener {
 		if (!nbts.hasNBT()) return;
 
 		if (nbts.getInt("Waystone") != 56958) return;
+
+		if (!e.getPlayer().hasPermission("waystones.place")) return;
 
 		//checking if maximum waypoints are reached
 		if (WaystoneManager.getInstance().waystones.size() >= Main.plugin.getConfig().getInt("MaximumWaypoints")) {
@@ -121,6 +123,7 @@ public class WaystoneListener implements Listener {
 			shulker.setInvulnerable(true);
 			shulker.setCustomName(stack.getItemMeta().getDisplayName());
 			shulker.setCustomNameVisible(true);
+			shulker.setSilent(true);
 
 			WaystoneManager.getInstance().addWaystone(waystone);
 			WaystoneManager.getInstance().activateWaystone(e.getPlayer(), waystone);
@@ -155,6 +158,7 @@ public class WaystoneListener implements Listener {
 			e.setCancelled(true);
 			return;
 		}
+		e.setCancelled(true);
 
 		//As the event always triggers two times
 		Long time = playerInteractTimer.get(e.getPlayer().getUniqueId().toString());
@@ -167,8 +171,10 @@ public class WaystoneListener implements Listener {
 		}
 
 		if (e.getPlayer().isSneaking()) { //only activation
+			if (!e.getPlayer().hasPermission("waystones.discover")) return;
 			WaystoneManager.getInstance().toggleWaystone(e.getPlayer(), waystone);
 		} else { //GUI and Teleport options and activation
+			if (!e.getPlayer().hasPermission("waystones.use")) return;
 			WaystoneManager.getInstance().activateWaystone(e.getPlayer(), waystone);
 
 			//Gather all possible waypoints

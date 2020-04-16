@@ -45,7 +45,7 @@ public class WarpscrollListener implements Listener {
 
 	@EventHandler //Cannot set ignorecancelled
 	public void onInteract(PlayerInteractEvent e) {
-		if (e.getAction() != Action.RIGHT_CLICK_AIR) return;
+		if (e.getAction() != Action.RIGHT_CLICK_AIR && e.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
 		ItemStack scroll = e.getItem();
 		if (scroll == null) return;
@@ -55,6 +55,8 @@ public class WarpscrollListener implements Listener {
 		if (!nbts.hasNBT()) return;
 
 		if (nbts.getInt("Warpscroll") != 56958) return;
+
+		if (!e.getPlayer().hasPermission("waystones.warpscroll.use")) return;
 
 		//As the event always triggers two times
 		Long time = playerInteractTimer.get(e.getPlayer().getUniqueId().toString());
