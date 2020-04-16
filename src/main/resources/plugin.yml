@@ -1,0 +1,6 @@
+name: Waystones
+version: ${project.version}
+main: de.flo56958.waystones.Main
+api-version: 1.13
+authors: [Flo56958]
+description: A survival immersive warping alternative.

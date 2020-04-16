@@ -1,0 +1,9 @@
+FreeTeleportRange: 150
+ExperienceCostPerBlock: 1.00
+InterdimensionalTravelCost: 500
+MaximumWaypoints: 256
+
+Warpscroll:
+  Cooldown: 500
+  TeleportWaitTime: 10
+  XPMultiplier: 1.0
