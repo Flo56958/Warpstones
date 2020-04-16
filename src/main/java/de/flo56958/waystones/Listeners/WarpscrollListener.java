@@ -45,7 +45,6 @@ public class WarpscrollListener implements Listener {
 
 	@EventHandler //Cannot set ignorecancelled
 	public void onInteract(PlayerInteractEvent e) {
-		//TODO: Make Teleport Time
 		if (e.getAction() != Action.RIGHT_CLICK_AIR) return;
 
 		ItemStack scroll = e.getItem();
@@ -159,7 +158,6 @@ public class WarpscrollListener implements Listener {
 				if (canTeleport) {
 					int finalCost = cost;
 					but.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE_ON_PLAYER(but, (p, s) -> {
-						if (p.getGameMode() != GameMode.CREATIVE) p.giveExp(-finalCost);
 						Location location = new Location(Bukkit.getWorld(item.worldname), item.x, item.y + 1, item.z);
 						if (Main.plugin.getConfig().getBoolean("EnvironmentEffects", true)) {
 							p.getLocation().getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
@@ -167,11 +165,19 @@ public class WarpscrollListener implements Listener {
 							p.getLocation().getWorld().spawnParticle(Particle.PORTAL, p.getLocation(), 128);
 						}
 						p.teleport(location);
-						cooldowns.put(p.getUniqueId().toString(), System.currentTimeMillis());
-						if (Main.plugin.getConfig().getBoolean("EnvironmentEffects", true)) {
-							location.getWorld().playSound(location, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
-							location.getWorld().spawnParticle(Particle.PORTAL, location, 128);
+						if (p.getGameMode() != GameMode.CREATIVE) {
+							p.giveExp(-finalCost);
+							cooldowns.put(p.getUniqueId().toString(), System.currentTimeMillis());
+							if (Main.plugin.getConfig().getBoolean("Warpscroll.RemoveAfterUse", false)) {
+								e.getItem().setAmount(e.getItem().getAmount() - 1);
+							}
 						}
+						Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
+							if (Main.plugin.getConfig().getBoolean("EnvironmentEffects", true)) {
+								location.getWorld().playSound(location, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+								location.getWorld().spawnParticle(Particle.PORTAL, location, 128);
+							}
+						}, 2);
 					}));
 				}
 				index++;

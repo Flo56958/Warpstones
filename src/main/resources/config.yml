@@ -5,6 +5,7 @@ MaximumWaypoints: 256
 EnvironmentEffects: true
 
 Warpscroll:
-  Cooldown: 500
+  Cooldown: 600
   TeleportWaitTime: 10
   XPMultiplier: 1.0
+  RemoveAfterUse: false

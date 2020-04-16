@@ -394,10 +394,12 @@ public class WaystoneListener implements Listener {
 								p.getLocation().getWorld().spawnParticle(Particle.PORTAL, p.getLocation(), 128);
 							}
 							p.teleport(loc);
-							if (Main.plugin.getConfig().getBoolean("EnvironmentEffects", true)) {
-								loc.getWorld().playSound(loc, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
-								loc.getWorld().spawnParticle(Particle.PORTAL, loc, 128);
-							}
+							Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
+								if (Main.plugin.getConfig().getBoolean("EnvironmentEffects", true)) {
+									loc.getWorld().playSound(loc, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+									loc.getWorld().spawnParticle(Particle.PORTAL, loc, 128);
+								}
+							}, 2);
 						}));
 					}
 					index++;
