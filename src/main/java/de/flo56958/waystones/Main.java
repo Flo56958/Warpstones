@@ -61,7 +61,7 @@ public final class Main extends JavaPlugin {
 
 		//Setting up Listeners
 		Bukkit.getPluginManager().registerEvents(new WaystoneListener(), this);
-		Bukkit.getPluginManager().registerEvents(new WorldSaveListener(), this);
+		if (getConfig().getBoolean("AutoSave", true)) Bukkit.getPluginManager().registerEvents(new WorldSaveListener(), this);
 		Bukkit.getPluginManager().registerEvents(new CraftingGridListener(), this);
 
 		//Setting up Crafting recipe

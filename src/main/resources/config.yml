@@ -3,6 +3,7 @@ ExperienceCostPerBlock: 1.00
 InterdimensionalTravelCost: 500
 MaximumWaypoints: 256
 EnvironmentEffects: true
+AutoSave: true
 
 WaystoneRecipe:
   Top: ' S '

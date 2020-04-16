@@ -299,6 +299,10 @@ public class WaystoneListener implements Listener {
 					if (player == null) {
 						p.sendMessage(ChatColor.RED + "Player was not found or not online!");
 					} else {
+						if (!player.hasPermission("waystones.place")) {
+							p.sendMessage(ChatColor.RED + player.getDisplayName() + "does not have the necessary permissions!");
+							return;
+						}
 						finalWaystone.owner = player.getUniqueId().toString();
 						p.sendMessage(ChatColor.WHITE + "Transferred successfully to " + input + "!");
 						player.sendMessage(ChatColor.WHITE + "You have been given ownership of the waypoint "
