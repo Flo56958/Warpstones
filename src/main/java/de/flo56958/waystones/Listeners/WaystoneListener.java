@@ -1,6 +1,7 @@
 package de.flo56958.waystones.Listeners;
 
 import de.flo56958.waystones.Main;
+import de.flo56958.waystones.TeleportManager;
 import de.flo56958.waystones.Utilities.NBT.NBTUtilitiesReflections;
 import de.flo56958.waystones.Utilities.PlayerInfo;
 import de.flo56958.waystones.Waystone;
@@ -225,26 +226,29 @@ public class WaystoneListener implements Listener {
 				}, ""));
 
 				//Set Waypoint Global
-				ItemStack globalitem = (waystone.isGlobal) ? new ItemStack(Material.GREEN_WOOL) : new ItemStack(Material.RED_WOOL);
-				meta = globalitem.getItemMeta();
-				meta.setDisplayName("Toggle Global Setting");
-				lore = new ArrayList<>();
-				lore.add(ChatColor.WHITE + "Should the waypoint be seen by everyone?");
-				meta.setLore(lore);
-				globalitem.setItemMeta(meta);
-				GUI.Window.Button global = window.addButton(4, 1, globalitem);
-				ItemStack finalGlobalitem = global.getItemStack();
-				global.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(global, () -> {
-					if (finalGlobalitem.getType() == Material.RED_WOOL) { //Toggle on
-						finalWaystone.isGlobal = true;
-						WaystoneManager.getInstance().globalWaystones.add(finalWaystone);
-						finalGlobalitem.setType(Material.GREEN_WOOL);
-					} else if (finalGlobalitem.getType() == Material.GREEN_WOOL) { //Toggle off
-						finalWaystone.isGlobal = false;
-						WaystoneManager.getInstance().globalWaystones.remove(finalWaystone);
-						finalGlobalitem.setType(Material.RED_WOOL);
-					}
-				}));
+				//TODO: Make option to pay for global Waystone
+				if(e.getPlayer().hasPermission("waystones.gobal")) {
+					ItemStack globalitem = (waystone.isGlobal) ? new ItemStack(Material.GREEN_WOOL) : new ItemStack(Material.RED_WOOL);
+					meta = globalitem.getItemMeta();
+					meta.setDisplayName("Toggle Global Setting");
+					lore = new ArrayList<>();
+					lore.add(ChatColor.WHITE + "Should the waypoint be seen by everyone?");
+					meta.setLore(lore);
+					globalitem.setItemMeta(meta);
+					GUI.Window.Button global = window.addButton(4, 1, globalitem);
+					ItemStack finalGlobalitem = global.getItemStack();
+					global.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(global, () -> {
+						if (finalGlobalitem.getType() == Material.RED_WOOL) { //Toggle on
+							finalWaystone.isGlobal = true;
+							WaystoneManager.getInstance().globalWaystones.add(finalWaystone);
+							finalGlobalitem.setType(Material.GREEN_WOOL);
+						} else if (finalGlobalitem.getType() == Material.GREEN_WOOL) { //Toggle off
+							finalWaystone.isGlobal = false;
+							WaystoneManager.getInstance().globalWaystones.remove(finalWaystone);
+							finalGlobalitem.setType(Material.RED_WOOL);
+						}
+					}));
+				}
 
 				//Change Waypoint Color
 				ItemStack coloritem = new ItemStack(Material.WHITE_WOOL);
@@ -334,6 +338,9 @@ public class WaystoneListener implements Listener {
 				}));
 			}
 
+			//TODO: add different sorting
+			//TODO: add option for custom ItemType in Menu
+
 			while (!done) {
 				GUI.Window currentPage = gui.addWindow(6, "Selector #" + windowindex++ + " - " + waystone.Name);
 
@@ -377,39 +384,49 @@ public class WaystoneListener implements Listener {
 					int dz = item.z - waystone.z;
 					long distance = Math.abs(Math.round(Math.sqrt(dx * dx + dy * dy + dz * dz)));
 					long dist = distance - Main.plugin.getConfig().getInt("FreeTeleportRange", 150);
-					int cost;
+					double cost;
 					if (dist <= 0) cost = 0;
-					else cost = (int) Math.round(dist * Main.plugin.getConfig().getDouble("ExperienceCostPerBlock"));
-					if (!waystone.worldname.equals(item.worldname)) cost += Main.plugin.getConfig().getInt("InterdimensionalTravelCost", 200);
+					else cost = dist * Main.plugin.getConfig().getDouble("CostPerBlock");
+					if (!waystone.worldname.equals(item.worldname)) cost += Main.plugin.getConfig().getDouble("InterdimensionalTravelCost", 200);
 					ChatColor color = ChatColor.WHITE;
 					boolean canTeleport = true;
-					if (e.getPlayer().getGameMode() != GameMode.CREATIVE && PlayerInfo.getPlayerExp(e.getPlayer()) < cost) {
-						canTeleport = false;
-						color = ChatColor.RED;
+					if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+						if (Main.useVault) {
+							if (!Main.econ.has(e.getPlayer(), cost)) {
+								canTeleport = false;
+								color = ChatColor.RED;
+							}
+						} else {
+							if (PlayerInfo.getPlayerExp(e.getPlayer()) < Math.round(cost)) {
+								canTeleport = false;
+								color = ChatColor.RED;
+							}
+						}
 					}
 					lore.add(ChatColor.WHITE + "Distance: " + distance + " Blocks");
-					lore.add(color + "XP-Cost to teleport: " + cost + "XP");
+					String ec = "XP";
+					String c = String.valueOf(Math.round(cost));
+					if (Main.useVault) {
+						ec = "";
+						c = Main.econ.format(cost);
+					}
+					lore.add(color + "Cost to teleport: " + c + " " + ec);
 					meta.setLore(lore);
 					stack.setItemMeta(meta);
 
 					GUI.Window.Button but = currentPage.addButton(index, stack);
 					if (canTeleport) {
-						int finalCost = cost;
+						double finalCost = cost;
 						but.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE_ON_PLAYER(but, (p, s) -> {
-							if (p.getGameMode() != GameMode.CREATIVE) p.giveExp(-finalCost);
-							Location loc = new Location(Bukkit.getWorld(item.worldname), item.x, item.y + 1, item.z);
-							if (Main.plugin.getConfig().getBoolean("EnvironmentEffects", true)) {
-								p.getLocation().getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
-								p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
-								p.getLocation().getWorld().spawnParticle(Particle.PORTAL, p.getLocation(), 128);
-							}
-							p.teleport(loc);
-							Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
-								if (Main.plugin.getConfig().getBoolean("EnvironmentEffects", true)) {
-									loc.getWorld().playSound(loc, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
-									loc.getWorld().spawnParticle(Particle.PORTAL, loc, 128);
+							if (p.getGameMode() != GameMode.CREATIVE) {
+								if (Main.useVault) {
+									Main.econ.withdrawPlayer(e.getPlayer(), finalCost);
+								} else {
+									p.giveExp(- (int) Math.round(finalCost));
 								}
-							}, 2);
+							}
+							Location loc = new Location(Bukkit.getWorld(item.worldname), item.x, item.y + 1, item.z);
+							TeleportManager.initTeleportation(p, loc, Main.plugin.getConfig().getInt("WaypointTeleportTime", 0));
 						}));
 					}
 					index++;

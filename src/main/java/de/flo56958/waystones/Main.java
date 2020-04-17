@@ -7,6 +7,7 @@ import de.flo56958.waystones.Listeners.WorldSaveListener;
 import de.flo56958.waystones.Utilities.NBT.NBTUtilitiesReflections;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -16,15 +17,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.logging.Level;
 
 public final class Main extends JavaPlugin {
 
 	public static JavaPlugin plugin;
 	public static ItemStack waystoneItem;
 	public static ItemStack warpscrollItem;
+
+	public static boolean useVault = false;
+	public static Economy econ = null;
 
 	static {
 		waystoneItem = new ItemStack(Material.SHULKER_SHELL);
@@ -105,6 +111,21 @@ public final class Main extends JavaPlugin {
 				e.printStackTrace();
 			}
 		}
+		useVault = setupEconomy();
+		if (useVault) Bukkit.getLogger().log(Level.INFO, "Found and enabled Vault!");
+	}
+
+	private boolean setupEconomy() {
+		if (!(getConfig().getBoolean("UseVault", false))) return false;
+		if (getServer().getPluginManager().getPlugin("Vault") == null) {
+			return false;
+		}
+		RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+		if (rsp == null) {
+			return false;
+		}
+		econ = rsp.getProvider();
+		return econ != null;
 	}
 
 	private void loadConfig() {

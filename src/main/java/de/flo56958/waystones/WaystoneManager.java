@@ -11,6 +11,8 @@ import java.util.*;
 
 public class WaystoneManager {
 
+	//TODO: Add way to make admins edit the waystones
+
 	private static WaystoneManager instance;
 
 	private final Gson gson = new Gson();

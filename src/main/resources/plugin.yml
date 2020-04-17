@@ -5,12 +5,16 @@ api-version: 1.13
 authors: [Flo56958]
 description: A survival immersive warping alternative.
 
+softdepend:
+  - Vault
+
 permissions:
   waystones.*:
     children:
       waystones.place: true
       waystones.use: true
       waystones.warpscroll.use: true
+      waystones.gobal: true
 
   waystones.use:
     default: true
@@ -25,3 +29,8 @@ permissions:
 
   waystones.discover:
     default: true
+
+  waystones.gobal:
+    children:
+      waystones.place: true
+    default: false

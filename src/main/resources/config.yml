@@ -1,9 +1,13 @@
 FreeTeleportRange: 150
-ExperienceCostPerBlock: 1.00
+CostPerBlock: 1.00
 InterdimensionalTravelCost: 500
 MaximumWaypoints: 256
 EnvironmentEffects: true
 AutoSave: true
+UseVault: false
+
+WaypointTeleportTime: 0
+WarpscrollTeleportTime: 5
 
 WaystoneRecipe:
   Top: ' S '

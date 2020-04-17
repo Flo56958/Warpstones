@@ -1,6 +1,7 @@
 package de.flo56958.waystones.Listeners;
 
 import de.flo56958.waystones.Main;
+import de.flo56958.waystones.TeleportManager;
 import de.flo56958.waystones.Utilities.NBT.NBTUtilitiesReflections;
 import de.flo56958.waystones.Utilities.PlayerInfo;
 import de.flo56958.waystones.Waystone;
@@ -140,46 +141,53 @@ public class WarpscrollListener implements Listener {
 				int dz = item.z - loc.getBlockZ();
 				long distance = Math.abs(Math.round(Math.sqrt(dx * dx + dy * dy + dz * dz)));
 				long dist = distance - Main.plugin.getConfig().getInt("FreeTeleportRange", 150);
-				int cost;
+				double cost;
 				if (dist <= 0) cost = 0;
-				else cost = (int) Math.round(dist * Main.plugin.getConfig().getDouble("ExperienceCostPerBlock"));
-				if (!loc.getWorld().getName().equals(item.worldname)) cost += Main.plugin.getConfig().getInt("InterdimensionalTravelCost", 200);
-				cost = (int) Math.round(cost * Main.plugin.getConfig().getDouble("Warpscroll.XPMultiplier", 1.0));
+				else cost = dist * Main.plugin.getConfig().getDouble("CostPerBlock");
+				if (!loc.getWorld().getName().equals(item.worldname)) cost += Main.plugin.getConfig().getDouble("InterdimensionalTravelCost", 200);
 				ChatColor color = ChatColor.WHITE;
 				boolean canTeleport = true;
-				if (e.getPlayer().getGameMode() != GameMode.CREATIVE && PlayerInfo.getPlayerExp(e.getPlayer()) < cost) {
-					canTeleport = false;
-					color = ChatColor.RED;
+				if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+					if (Main.useVault) {
+						if (!Main.econ.has(e.getPlayer(), cost)) {
+							canTeleport = false;
+							color = ChatColor.RED;
+						}
+					} else {
+						if (PlayerInfo.getPlayerExp(e.getPlayer()) < Math.round(cost)) {
+							canTeleport = false;
+							color = ChatColor.RED;
+						}
+					}
 				}
 				lore.add(ChatColor.WHITE + "Distance: " + distance + " Blocks");
-				if (cost > 0) lore.add(color + "XP-Cost to teleport: " + cost + "XP");
+				String ec = "XP";
+				String c = String.valueOf(Math.round(cost));
+				if (Main.useVault) {
+					ec = "";
+					c = Main.econ.format(cost);
+				}
+				lore.add(color + "Cost to teleport: " + c + " " + ec);
 				meta.setLore(lore);
 				stack.setItemMeta(meta);
 
 				GUI.Window.Button but = currentPage.addButton(index, stack);
 				if (canTeleport) {
-					int finalCost = cost;
+					double finalCost = cost;
 					but.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE_ON_PLAYER(but, (p, s) -> {
 						Location location = new Location(Bukkit.getWorld(item.worldname), item.x, item.y + 1, item.z);
-						if (Main.plugin.getConfig().getBoolean("EnvironmentEffects", true)) {
-							p.getLocation().getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
-							p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
-							p.getLocation().getWorld().spawnParticle(Particle.PORTAL, p.getLocation(), 128);
-						}
-						p.teleport(location);
+						TeleportManager.initTeleportation(p, location, Main.plugin.getConfig().getInt("WarpscrollTeleportTime", 5));
 						if (p.getGameMode() != GameMode.CREATIVE) {
-							p.giveExp(-finalCost);
+							if (Main.useVault) {
+								Main.econ.withdrawPlayer(e.getPlayer(), finalCost);
+							} else {
+								p.giveExp(- (int) Math.round(finalCost));
+							}
 							cooldowns.put(p.getUniqueId().toString(), System.currentTimeMillis());
 							if (Main.plugin.getConfig().getBoolean("Warpscroll.RemoveAfterUse", false)) {
 								e.getItem().setAmount(e.getItem().getAmount() - 1);
 							}
 						}
-						Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
-							if (Main.plugin.getConfig().getBoolean("EnvironmentEffects", true)) {
-								location.getWorld().playSound(location, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
-								location.getWorld().spawnParticle(Particle.PORTAL, location, 128);
-							}
-						}, 2);
 					}));
 				}
 				index++;
