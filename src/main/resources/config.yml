@@ -5,6 +5,7 @@ MaximumWaypoints: 256
 EnvironmentEffects: true
 AutoSave: true
 UseVault: false
+MakeGlobalCost: 100
 
 WaypointTeleportTime: 0
 WarpscrollTeleportTime: 5

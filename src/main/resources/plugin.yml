@@ -15,12 +15,17 @@ permissions:
       waystones.use: true
       waystones.warpscroll.use: true
       waystones.gobal: true
+      waystones.admin: true
 
-  waystones.use:
-    default: true
+  waystones.admin:
+    children:
+      waystones.global: true
+    default: false
 
-  waystones.warpscroll.use:
-    default: true
+  waystones.gobal:
+    children:
+      waystones.place: true
+    default: false
 
   waystones.place:
     children:
@@ -28,9 +33,13 @@ permissions:
     default: true
 
   waystones.discover:
+    children:
+      waystones.use: true
+      waystones.warpscroll.use: true
     default: true
 
-  waystones.gobal:
-    children:
-      waystones.place: true
-    default: false
+  waystones.use:
+    default: true
+
+  waystones.warpscroll.use:
+    default: true

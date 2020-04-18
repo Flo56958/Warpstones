@@ -4,6 +4,7 @@ import org.bukkit.DyeColor;
 
 public class Waystone {
 
+	//TODO: instead of WorldName use UUID of World
 	public String worldname;
 	public int x;
 	public int y;
