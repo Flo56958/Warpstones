@@ -482,7 +482,7 @@ public class WaystoneManager {
 			int index = 0;
 			Location from = p.getLocation();
 			if (waystone != null)
-				from = new Location(Bukkit.getServer().getWorld(waystone.worldname), waystone.x, waystone.y, waystone.z);
+				from = new Location(Bukkit.getServer().getWorld(UUID.fromString(waystone.worlduuid)), waystone.x, waystone.y, waystone.z);
 			while (!wslist.isEmpty() && index < 45) {
 				Waystone item = wslist.get(0);
 				wslist.remove(0);
@@ -496,7 +496,7 @@ public class WaystoneManager {
 				String playername = Bukkit.getOfflinePlayer(UUID.fromString(item.owner)).getName();
 				lore.add(ChatColor.WHITE + "Owner: " + playername);
 				if (item.isGlobal) lore.add(ChatColor.WHITE + "Global Waystone");
-				lore.add(ChatColor.WHITE + "World: " + item.worldname);
+				lore.add(ChatColor.WHITE + "World: " + Bukkit.getServer().getWorld(UUID.fromString(item.worlduuid)).getName());
 				lore.add(ChatColor.WHITE + "Location: " + item.x + " " + item.y + " " + item.z);
 
 				//calculate cost
@@ -508,7 +508,7 @@ public class WaystoneManager {
 				double cost;
 				if (dist <= 0) cost = 0;
 				else cost = dist * Main.plugin.getConfig().getDouble("CostPerBlock");
-				if (!from.getWorld().getName().equals(item.worldname))
+				if (!from.getWorld().getUID().toString().equals(item.worlduuid))
 					cost += Main.plugin.getConfig().getDouble("InterdimensionalTravelCost", 200);
 				boolean canTeleport = canAfford(p, cost);
 				ChatColor color = (canTeleport) ? ChatColor.WHITE : ChatColor.RED;
@@ -529,12 +529,12 @@ public class WaystoneManager {
 					if (waystone != null) {
 						but.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(but, () -> {
 							withdraw(p, finalCost);
-							Location loc = new Location(Bukkit.getWorld(item.worldname), item.x, item.y + 1, item.z);
+							Location loc = new Location(Bukkit.getWorld(UUID.fromString(item.worlduuid)), item.x, item.y + 1, item.z);
 							TeleportManager.initTeleportation(p, loc, Main.plugin.getConfig().getInt("WaypointTeleportTime", 0));
 						}));
 					} else {
 						but.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(but, () -> {
-							Location location = new Location(Bukkit.getWorld(item.worldname), item.x, item.y + 1, item.z);
+							Location location = new Location(Bukkit.getWorld(UUID.fromString(item.worlduuid)), item.x, item.y + 1, item.z);
 							TeleportManager.initTeleportation(p, location, Main.plugin.getConfig().getInt("WarpscrollTeleportTime", 5));
 							if (p.getGameMode() != GameMode.CREATIVE) {
 								withdraw(p, finalCost);

@@ -91,7 +91,7 @@ public class WaystoneListener implements Listener {
 			Shulker shulker = (Shulker) ent;
 			waystone.uuid = shulker.getUniqueId().toString();
 			waystone.Name = stack.getItemMeta().getDisplayName();
-			waystone.worldname = loc.getWorld().getName();
+			waystone.worlduuid = loc.getWorld().getUID().toString();
 			waystone.owner = e.getPlayer().getUniqueId().toString();
 			waystone.color = shulker.getColor();
 			waystone.x = loc.getBlockX();
