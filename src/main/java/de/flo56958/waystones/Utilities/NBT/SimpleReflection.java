@@ -1,52 +1,10 @@
 package de.flo56958.waystones.Utilities.NBT;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.util.LinkedList;
 import java.util.List;
 
 public class SimpleReflection {
-	public static Object getObject(String attribute, Object obj) throws SecurityException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException {
-		Class<?> classy = obj.getClass();
-
-		do {
-			try {
-				Field field = classy.getDeclaredField(attribute);
-				if (field == null) continue;
-				field.setAccessible(true);
-				return field.get(obj);
-			} catch (NoSuchFieldException e) {
-			}
-		} while ((classy = classy.getSuperclass()) != null);
-
-		throw new NoSuchFieldException();
-	}
-
-	public static Field getField(String attribute, Object obj) throws SecurityException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException {
-		return getField(attribute, obj.getClass());
-	}
-
-	public static Field getField(String attribute, Class<?> classy) throws SecurityException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException {
-		do {
-			try {
-				Field field = classy.getDeclaredField(attribute);
-				if (field == null) continue;
-				field.trySetAccessible();
-				return field;
-			} catch (NoSuchFieldException e) {}
-		} while ((classy = classy.getSuperclass()) != null);
-
-		throw new NoSuchFieldException();
-	}
-
-	public static <T extends Enum<T>> T getEnum(Class<T> classy, String name) {
-		return Enum.valueOf(classy, name);
-	}
 
 	public static Object createObject(Class<?> classy, Object... objects) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		List<Constructor<?>> constructors = new LinkedList<>();
@@ -60,7 +18,7 @@ public class SimpleReflection {
 			return null;
 		else if (constructors.size() == 1) {
 			Constructor<?> constructor = constructors.get(0);
-			constructor.trySetAccessible();
+			constructor.setAccessible(true);
 
 			Object[] args = null;
 			int startPos = constructor.getParameterCount() - 1;
@@ -119,7 +77,7 @@ public class SimpleReflection {
 
 		if (bestFound == null) return null;
 
-		bestFound.trySetAccessible();
+		bestFound.setAccessible(true);
 		return bestFound.newInstance(objects);
 	}
 
@@ -147,7 +105,7 @@ public class SimpleReflection {
 			return null;
 		else if (methods.size() == 1) {
 			Method method = methods.get(0);
-			method.trySetAccessible();
+			method.setAccessible(true);
 
 			Object[] args = null;
 			int startPos = method.getParameterCount() - 1;
@@ -208,59 +166,10 @@ public class SimpleReflection {
 
 		if (bestFound == null) return null;
 
-		bestFound.trySetAccessible();
+		bestFound.setAccessible(true);
 		if (isStatic)
 			return bestFound.invoke(classy, objects);
 		return bestFound.invoke(obj, objects);
-	}
-
-	public static Method getMethod(Class<?> classy, boolean isStatic, String name, Class<?>... classParameters) {
-		List<Method> methods = new LinkedList<>();
-		for (Method m : classy.getMethods()) {
-			if (!m.getName().equals(name)) continue;
-			if (m.getParameterCount() != classParameters.length) continue;
-			if (isStatic != Modifier.isStatic(m.getModifiers())) continue;
-			methods.add(m);
-			if (classParameters.length == 0) break;
-		}
-
-		if (methods.isEmpty())
-			return null;
-		else if (methods.size() == 1)
-			return methods.get(0);
-
-		Method bestFound = null;
-		int lastBestValue = 0;
-
-		for (Method m : methods) {
-			boolean shouldContinue = false;
-			Parameter[] paramters = m.getParameters();
-			int best = 0;
-
-			for (int i = 0; i < paramters.length; i++) {
-				Class<?> myClass = getDataTypesSuperclass(classParameters[i]);
-				Class<?> paramClass = paramters[i].getType();
-
-				if (!paramClass.isAssignableFrom(myClass)) {
-					shouldContinue = true;
-					break;
-				}
-
-				while (paramClass != myClass) {
-					myClass = myClass.getSuperclass();
-					best++;
-				}
-			}
-
-			if (shouldContinue) continue;
-			if (best < lastBestValue || bestFound == null) {
-				lastBestValue = best;
-				bestFound = m;
-			}
-			if (best == 0) break;
-		}
-
-		return bestFound;
 	}
 
 	public static Class<?> getDataTypesSuperclass(Class<?> myClass) {
@@ -283,55 +192,4 @@ public class SimpleReflection {
 		return myClass;
 	}
 
-	public static Class<?>[] getInterfacesArray(Class<?> classy) {
-		List<Class<?>> list = getInterfaces(classy);
-		Class<?>[] array = new Class<?>[list.size()];
-		return list.toArray(array);
-	}
-
-	public static List<Class<?>> getInterfaces(Class<?> classy) {
-		if (classy == null) return null;
-
-		List<Class<?>> list = new LinkedList<>();
-
-		while (classy != Object.class && classy != null) {
-			for (Class<?> classe : classy.getInterfaces()) {
-				if (!list.contains(classe))
-					list.add(classe);
-
-				for (Class<?> classe2 : getInterfaces(classe)) {
-					if (!list.contains(classe2))
-						list.add(classe2);
-				}
-			}
-
-			classy = classy.getSuperclass();
-		}
-
-		return list;
-	}
-
-	public static List<String> listAttributes(Object obj) {
-		List<String> list = new LinkedList<>();
-
-		for (Field field : obj.getClass().getDeclaredFields())
-			list.add(field.getName());
-
-		return list;
-	}
-
-	public static String listAttributesToString(Object obj) {
-		StringBuilder builder = new StringBuilder();
-
-		Class<?> classy = obj.getClass();
-
-		do {
-			builder.append("\n").append(classy.getName()).append(" :");
-
-			for (Field field : classy.getDeclaredFields())
-				builder.append("\n  ").append(field.getType().getSimpleName()).append(" ").append(field.getName());
-		} while ((classy = classy.getSuperclass()) != null);
-
-		return builder.toString();
-	}
 }

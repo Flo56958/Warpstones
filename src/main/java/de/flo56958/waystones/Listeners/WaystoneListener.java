@@ -20,12 +20,9 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
 import java.util.UUID;
 
 public class WaystoneListener implements Listener {
-
-	private final HashMap<String, Long> playerInteractTimer = new HashMap<>();
 
 	@EventHandler (priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onPlace(PlayerInteractEvent e) {

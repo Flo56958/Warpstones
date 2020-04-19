@@ -21,7 +21,6 @@ WaystoneRecipe:
 Warpscroll:
   Enabled: true
   Cooldown: 600
-  TeleportWaitTime: 10
   XPMultiplier: 1.0
   RemoveAfterUse: false
   Recipe:

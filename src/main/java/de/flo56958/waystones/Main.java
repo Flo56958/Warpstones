@@ -26,8 +26,12 @@ import java.util.logging.Level;
 public final class Main extends JavaPlugin {
 
 	public static JavaPlugin plugin;
+	//TODO: Make give command
 	public static ItemStack waystoneItem;
 	public static ItemStack warpscrollItem;
+
+	//TODO: Make command to give sword to instantly kill Waystones
+	//TODO: Player should decide if XP or Vault
 
 	public static boolean useVault = false;
 	public static Economy econ = null;
