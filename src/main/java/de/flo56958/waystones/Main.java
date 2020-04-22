@@ -4,7 +4,9 @@ import de.flo56958.waystones.Listeners.CraftingGridListener;
 import de.flo56958.waystones.Listeners.WarpscrollListener;
 import de.flo56958.waystones.Listeners.WaystoneListener;
 import de.flo56958.waystones.Listeners.WorldSaveListener;
+import de.flo56958.waystones.Utilities.LanguageManager;
 import de.flo56958.waystones.Utilities.NBT.NBTUtilitiesReflections;
+import de.flo56958.waystones.commands.CommandManager;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.milkbowl.vault.economy.Economy;
@@ -28,11 +30,9 @@ import java.util.logging.Level;
 public final class Main extends JavaPlugin {
 
 	public static JavaPlugin plugin;
-	//TODO: Make give command
 	public static ItemStack waystoneItem;
 	public static ItemStack warpscrollItem;
 
-	//TODO: Make command to give sword to instantly kill Waystones
 	//TODO: Player should decide if XP or Vault
 
 	public static boolean useVault = false;
@@ -67,9 +67,18 @@ public final class Main extends JavaPlugin {
 
 		//load config
 		loadConfig();
+		LanguageManager.reload();
+
+		useVault = setupEconomy();
+		if (useVault) Bukkit.getLogger().log(Level.INFO, "Found and enabled Vault!");
 
 		//Setting up WaystoneManager
 		WaystoneManager.getInstance();
+
+		//Setting up Commands
+		CommandManager cmd = new CommandManager();
+		this.getCommand("waystones").setExecutor(cmd);
+		this.getCommand("waystones").setTabCompleter(cmd);
 
 		//Setting up Listeners
 		Bukkit.getPluginManager().registerEvents(new WaystoneListener(), this);
@@ -132,8 +141,6 @@ public final class Main extends JavaPlugin {
 				e.printStackTrace();
 			}
 		}
-		useVault = setupEconomy();
-		if (useVault) Bukkit.getLogger().log(Level.INFO, "Found and enabled Vault!");
 	}
 
 	private boolean setupEconomy() {

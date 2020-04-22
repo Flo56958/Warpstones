@@ -8,6 +8,12 @@ description: A survival immersive warping alternative.
 softdepend:
   - Vault
 
+commands:
+  waystones:
+    aliases: [ws]
+    description: Main Command of Waystones
+    usage: /waystones [sub]
+
 permissions:
   waystones.*:
     children:
@@ -16,11 +22,32 @@ permissions:
       waystones.warpscroll.use: true
       waystones.gobal: true
       waystones.admin: true
+      waystones.commands.*: true
+
+  waystones.commands.*:
+    children:
+      waystones.commands.main: true
+      waystones.commands.give: true
+      waystones.commands.listallwaypoints: true
+
+  waystones.commands.main:
+    default: true
+
+  waystones.commands.give:
+    children:
+      waystones.commands.main: true
+    default: op
+
+  waystones.commands.listallwaypoints:
+    children:
+      waystones.commands.main: true
+    default: op
+
 
   waystones.admin:
     children:
       waystones.global: true
-    default: false
+    default: op
 
   waystones.gobal:
     children:

@@ -1,0 +1,12 @@
+Commands.Failure.Main: "Command failed: %cause"
+Commands.Failure.Cause.PlayerNotFound: "Player %p not found!"
+Commands.Failure.Cause.PlayerMissing: "Needed Player Information missing!"
+Commands.Failure.Cause.InvalidArguments: "Invalid Arguments!"
+Commands.Failure.Cause.NumberFormatException: "NumberFormatException!"
+Commands.Failure.Cause.PlayerOnlyCommand: "Player only Command!"
+Commands.Failure.Cause.UnknownCommand: "Unknown Command!"
+Commands.Failure.Cause.NoPermission: "No Permission!"
+Commands.Failure.Cause.InvalidItem: "Invalid Item!"
+Commands.Failure.Cause.NameNotAllowed: "Name not allowed!"
+
+LanguageManager.LoadedLanguage: "LanguageManager loaded %lang successfully!"

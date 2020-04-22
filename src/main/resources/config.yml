@@ -1,3 +1,7 @@
+chat-prefix: '[Waystones]'
+Language: en_US
+chat-messages: true
+EnablePlayerLocale: false
 FreeTeleportRange: 150
 CostPerBlock: 1.00
 InterdimensionalTravelCost: 500

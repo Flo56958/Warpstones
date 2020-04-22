@@ -145,7 +145,7 @@ public class WaystoneListener implements Listener {
 			if (!e.getPlayer().hasPermission("waystones.use")) return;
 			WaystoneManager.getInstance().activateWaystone(e.getPlayer(), waystone);
 
-			GUI gui = WaystoneManager.getInstance().createGUI(waystone, null, e.getPlayer(), shulker);
+			GUI gui = WaystoneManager.getInstance().createGUI(waystone, null, e.getPlayer(), shulker, false);
 
 			gui.show(e.getPlayer());
 		}

@@ -278,22 +278,27 @@ public class WaystoneManager {
 		}
 	}
 
-	public GUI createGUI(Waystone waystone, ItemStack warpscroll, Player p, Shulker shulker) {
+	public GUI createGUI(Waystone waystone, ItemStack warpscroll, Player p, Shulker shulker, boolean listall) {
 		//Gather all possible waypoints
-		HashSet<Waystone> ws = new HashSet<>(WaystoneManager.getInstance().globalWaystones);
-		HashSet<String> toremove = new HashSet<>();
+		HashSet<Waystone> ws;
+		if (!listall) {
+			ws = new HashSet<>(WaystoneManager.getInstance().globalWaystones);
+			HashSet<String> toremove = new HashSet<>();
 
-		loop:
-		for (String s : WaystoneManager.getInstance().playerWaystones.get(p.getUniqueId().toString())) {
-			for (Waystone w : WaystoneManager.getInstance().waystones) {
-				if (w.uuid.equals(s)) {
-					ws.add(w);
-					continue loop;
+			loop:
+			for (String s : WaystoneManager.getInstance().playerWaystones.get(p.getUniqueId().toString())) {
+				for (Waystone w : WaystoneManager.getInstance().waystones) {
+					if (w.uuid.equals(s)) {
+						ws.add(w);
+						continue loop;
+					}
 				}
+				toremove.add(s);
 			}
-			toremove.add(s);
+			WaystoneManager.getInstance().playerWaystones.get(p.getUniqueId().toString()).removeAll(toremove);
+		} else {
+			ws = new HashSet<>(waystones);
 		}
-		WaystoneManager.getInstance().playerWaystones.get(p.getUniqueId().toString()).removeAll(toremove);
 
 		ArrayList<Waystone> wslist = new ArrayList<>(ws);
 		wslist.sort(Comparator.comparing(x -> x.Name));
@@ -526,7 +531,7 @@ public class WaystoneManager {
 				GUI.Window.Button but = currentPage.addButton(index, stack);
 				if (canTeleport) {
 					double finalCost = cost;
-					if (waystone != null) {
+					if (waystone != null || listall) {
 						but.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(but, () -> {
 							withdraw(p, finalCost);
 							Location loc = new Location(Bukkit.getWorld(UUID.fromString(item.worlduuid)), item.x, item.y + 1, item.z);

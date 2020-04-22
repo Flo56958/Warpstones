@@ -67,7 +67,7 @@ public class WarpscrollListener implements Listener {
 			}
 		}
 
-		GUI gui = WaystoneManager.getInstance().createGUI(null, e.getItem(), e.getPlayer(), null);
+		GUI gui = WaystoneManager.getInstance().createGUI(null, e.getItem(), e.getPlayer(), null, false);
 		gui.show(e.getPlayer());
 	}
 }
