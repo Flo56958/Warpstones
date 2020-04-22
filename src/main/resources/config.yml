@@ -14,9 +14,6 @@ WaystoneRecipe:
   Top: ' S '
   Middle: 'SNS'
   Bottom: ' S '
-  Materials:
-    S: SHULKER_SHELL
-    N: NETHER_STAR
 
 Warpscroll:
   Enabled: true
@@ -27,6 +24,3 @@ Warpscroll:
     Top: ' P '
     Middle: 'PSP'
     Bottom: ' P '
-    Materials:
-      S: SHULKER_SHELL
-      P: PAPER

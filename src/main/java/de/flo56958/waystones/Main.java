@@ -21,6 +21,8 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 public final class Main extends JavaPlugin {
@@ -76,6 +78,21 @@ public final class Main extends JavaPlugin {
 
 		//Setting up Crafting recipe
 		FileConfiguration config = this.getConfig();
+		{
+			Map<String, String> recipeMaterials = new HashMap<>();
+			recipeMaterials.put("S", Material.SHULKER_SHELL.name());
+			recipeMaterials.put("N", Material.NETHER_STAR.name());
+
+			config.addDefault("WaystoneRecipe.Materials", recipeMaterials);
+		}
+		{
+			Map<String, String> recipeMaterials = new HashMap<>();
+			recipeMaterials.put("S", Material.SHULKER_SHELL.name());
+			recipeMaterials.put("P", Material.PAPER.name());
+
+			config.addDefault("Warpscroll.Recipe.Materials", recipeMaterials);
+		}
+		saveConfig();
 		try {
 			NamespacedKey nkey = new NamespacedKey(Main.plugin, "Waystone");
 			ShapedRecipe newRecipe = new ShapedRecipe(nkey, waystoneItem);
