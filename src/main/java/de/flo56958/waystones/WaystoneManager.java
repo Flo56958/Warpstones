@@ -2,6 +2,7 @@ package de.flo56958.waystones;
 
 import com.google.gson.Gson;
 import de.flo56958.waystones.Utilities.PlayerInfo;
+import de.flo56958.waystones.Utilities.SortingType;
 import de.flo56958.waystones.gui.ButtonAction;
 import de.flo56958.waystones.gui.GUI;
 import org.bukkit.*;
@@ -46,7 +47,7 @@ public class WaystoneManager {
 	//contains all public Waystones
 	public List<Waystone> globalWaystones;
 	//Maps a Player to his activated Waystones
-	public HashMap<String, HashSet<String>> playerWaystones;
+	public HashMap<String, PlayerSave> playerWaystones;
 
 	public static boolean checkInteractTimer(Player player) {
 		Long time = playerInteractTimer.get(player.getUniqueId().toString());
@@ -131,8 +132,8 @@ public class WaystoneManager {
 						is.close();
 
 						String json = sb.toString();
-						HashSet<String> list = (HashSet<String>) gson.fromJson(json, HashSet.class);
-						playerWaystones.put(child.getName().split("\\.")[0], list);
+						PlayerSave save = gson.fromJson(json, PlayerSave.class);
+						playerWaystones.put(child.getName().split("\\.")[0], save);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -151,20 +152,20 @@ public class WaystoneManager {
 	}
 
 	public void activateWaystone(Player p, Waystone waystone) {
-		playerWaystones.putIfAbsent(p.getUniqueId().toString(), new HashSet<>());
-		playerWaystones.get(p.getUniqueId().toString()).add(waystone.uuid);
+		playerWaystones.putIfAbsent(p.getUniqueId().toString(), new PlayerSave(new HashSet<>(), SortingType.ALPHABETICAL));
+		playerWaystones.get(p.getUniqueId().toString()).waystones.add(waystone.uuid);
 	}
 
 	public void toggleWaystone(Player p, Waystone waystone) {
-		playerWaystones.putIfAbsent(p.getUniqueId().toString(), new HashSet<>());
-		HashSet<String> set = playerWaystones.get(p.getUniqueId().toString());
-		if (set.contains(waystone.uuid)) {
+		playerWaystones.putIfAbsent(p.getUniqueId().toString(), new PlayerSave(new HashSet<>(), SortingType.ALPHABETICAL));
+		PlayerSave save = playerWaystones.get(p.getUniqueId().toString());
+		if (save.waystones.contains(waystone.uuid)) {
 			if (waystone.owner.equals(p.getUniqueId().toString()))
 				return; //owner should always have the waystone discovered
-			set.remove(waystone.uuid);
+			save.waystones.remove(waystone.uuid);
 			Main.sendActionBar(p, "Waystone " + waystone.Name + " has been undiscovered!");
 		} else {
-			set.add(waystone.uuid);
+			save.waystones.add(waystone.uuid);
 			Main.sendActionBar(p, "Waystone " + waystone.Name + " has been discovered!");
 		}
 	}
@@ -185,7 +186,7 @@ public class WaystoneManager {
 	}
 
 	public void savePlayer(String uuid) {
-		String str = gson.toJson(playerWaystones.get(uuid), HashSet.class);
+		String str = gson.toJson(playerWaystones.get(uuid), PlayerSave.class);
 		try {
 			File file = new File(Main.plugin.getDataFolder(), "/saves/Players/" + uuid + ".json");
 			if (!file.exists()) {
@@ -279,15 +280,21 @@ public class WaystoneManager {
 	}
 
 	public GUI createGUI(Waystone waystone, ItemStack warpscroll, Player p, Shulker shulker, boolean listall) {
+		PlayerSave save = playerWaystones.get(p.getUniqueId().toString());
+		if (save == null) return null;
+
+		Location from = p.getLocation();
+		if (waystone != null)
+			from = new Location(Bukkit.getServer().getWorld(UUID.fromString(waystone.worlduuid)), waystone.x, waystone.y, waystone.z);
 		//Gather all possible waypoints
 		HashSet<Waystone> ws;
 		if (!listall) {
-			ws = new HashSet<>(WaystoneManager.getInstance().globalWaystones);
+			ws = new HashSet<>(globalWaystones);
 			HashSet<String> toremove = new HashSet<>();
 
 			loop:
-			for (String s : WaystoneManager.getInstance().playerWaystones.get(p.getUniqueId().toString())) {
-				for (Waystone w : WaystoneManager.getInstance().waystones) {
+			for (String s : save.waystones) {
+				for (Waystone w : waystones) {
 					if (w.uuid.equals(s)) {
 						ws.add(w);
 						continue loop;
@@ -295,20 +302,55 @@ public class WaystoneManager {
 				}
 				toremove.add(s);
 			}
-			WaystoneManager.getInstance().playerWaystones.get(p.getUniqueId().toString()).removeAll(toremove);
+			save.waystones.removeAll(toremove);
 		} else {
 			ws = new HashSet<>(waystones);
 		}
 
+		HashMap<Waystone, Long> distances = new HashMap<>();
+		HashMap<Waystone, Double> costs = new HashMap<>();
+
+		for (Waystone w : ws) {
+			//calculate distance
+			int dx = w.x - from.getBlockX();
+			int dy = w.y - from.getBlockY();
+			int dz = w.z - from.getBlockZ();
+			long distance = Math.abs(Math.round(Math.sqrt(dx * dx + dy * dy + dz * dz)));
+			distances.put(w, distance);
+
+			//calculate cost
+			long dist = distance - Main.plugin.getConfig().getInt("FreeTeleportRange", 150);
+			double cost;
+			if (dist <= 0) cost = 0;
+			else cost = dist * Main.plugin.getConfig().getDouble("CostPerBlock");
+			if (!from.getWorld().getUID().toString().equals(w.worlduuid))
+				cost += Main.plugin.getConfig().getDouble("InterdimensionalTravelCost", 200);
+			costs.put(w, cost);
+		}
+
 		ArrayList<Waystone> wslist = new ArrayList<>(ws);
-		wslist.sort(Comparator.comparing(x -> x.Name));
+		switch (save.sortingType) {
+			case ALPHABETICAL:
+				wslist.sort(Comparator.comparing(x -> x.Name));
+				break;
+			case DISTANCE:
+				wslist.sort(Comparator.comparing(distances::get));
+				break;
+			case COST:
+				wslist.sort(Comparator.comparing(costs::get));
+				break;
+			case RANDOM:
+				Collections.shuffle(wslist);
+				break;
+		}
 
 		int size = wslist.size();
 
 		GUI gui = new GUI();
 		int windowindex = 1;
 		boolean done = false;
-		boolean isOwner = waystone != null && (waystone.owner.equals(p.getUniqueId().toString()) || p.hasPermission("waystones.admin"));
+		boolean isOwner = waystone != null && (waystone.owner.equals(p.getUniqueId().toString())
+				|| p.hasPermission("waystones.admin"));
 		GUI customizeGUI = null;
 		if (isOwner) {
 			customizeGUI = new GUI();
@@ -459,7 +501,6 @@ public class WaystoneManager {
 			}));
 		}
 
-		//TODO: add different sorting
 		//TODO: add option for custom ItemType in Menu
 
 		while (!done) {
@@ -484,10 +525,24 @@ public class WaystoneManager {
 				forward.addAction(ClickType.LEFT, new ButtonAction.PAGE_UP(forward));
 			}
 
+			{
+				ItemStack sortStack = new ItemStack(Material.PAPER);
+				ItemMeta meta = sortStack.getItemMeta();
+				meta.setDisplayName(save.sortingType.getDisplayName());
+				meta.setLore(Collections.singletonList(ChatColor.WHITE + "Effect only after Interface reopening"));
+				sortStack.setItemMeta(meta);
+
+				GUI.Window.Button sort = currentPage.addButton(7, 5, sortStack);
+				ItemStack finalsortStack = sort.getItemStack();
+				sort.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(sort, () -> {
+					save.sortingType = save.sortingType.getNext();
+					ItemMeta m = finalsortStack.getItemMeta();
+					m.setDisplayName(save.sortingType.getDisplayName());
+					finalsortStack.setItemMeta(m);
+				}));
+			}
+
 			int index = 0;
-			Location from = p.getLocation();
-			if (waystone != null)
-				from = new Location(Bukkit.getServer().getWorld(UUID.fromString(waystone.worlduuid)), waystone.x, waystone.y, waystone.z);
 			while (!wslist.isEmpty() && index < 45) {
 				Waystone item = wslist.get(0);
 				wslist.remove(0);
@@ -504,17 +559,8 @@ public class WaystoneManager {
 				lore.add(ChatColor.WHITE + "World: " + Bukkit.getServer().getWorld(UUID.fromString(item.worlduuid)).getName());
 				lore.add(ChatColor.WHITE + "Location: " + item.x + " " + item.y + " " + item.z);
 
-				//calculate cost
-				int dx = item.x - from.getBlockX();
-				int dy = item.y - from.getBlockY();
-				int dz = item.z - from.getBlockZ();
-				long distance = Math.abs(Math.round(Math.sqrt(dx * dx + dy * dy + dz * dz)));
-				long dist = distance - Main.plugin.getConfig().getInt("FreeTeleportRange", 150);
-				double cost;
-				if (dist <= 0) cost = 0;
-				else cost = dist * Main.plugin.getConfig().getDouble("CostPerBlock");
-				if (!from.getWorld().getUID().toString().equals(item.worlduuid))
-					cost += Main.plugin.getConfig().getDouble("InterdimensionalTravelCost", 200);
+				double cost = costs.get(item);
+				long distance = distances.get(item);
 				boolean canTeleport = canAfford(p, cost);
 				ChatColor color = (canTeleport) ? ChatColor.WHITE : ChatColor.RED;
 				lore.add(ChatColor.WHITE + "Distance: " + distance + " Blocks");

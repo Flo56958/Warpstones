@@ -67,6 +67,7 @@ public class GiveCommand implements SubCommand {
 			if (player.getInventory().addItem(sword).size() != 0) { //adds items to (full) inventory
 				player.getWorld().dropItem(player.getLocation(), sword);
 			} // no else as it gets added in if
+			return true;
 		}
 
 		CommandManager.sendError(sender, LanguageManager.getString("Commands.Failure.Cause.InvalidArguments"));
