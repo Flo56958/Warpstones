@@ -1,9 +1,9 @@
-package de.flo56958.waystones.commands;
+package de.flo56958.warpstones.commands;
 
-import de.flo56958.waystones.Utilities.ChatWriter;
-import de.flo56958.waystones.Utilities.LanguageManager;
-import de.flo56958.waystones.commands.subs.GiveCommand;
-import de.flo56958.waystones.commands.subs.ListAllWaypointsCommand;
+import de.flo56958.warpstones.Utilities.ChatWriter;
+import de.flo56958.warpstones.Utilities.LanguageManager;
+import de.flo56958.warpstones.commands.subs.GiveCommand;
+import de.flo56958.warpstones.commands.subs.ListAllWarpstonesCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -26,7 +26,7 @@ public class CommandManager implements TabExecutor {
 	public CommandManager() {
 		ArrayList<SubCommand> commands = new ArrayList<>();
 		commands.add(new GiveCommand());
-		commands.add(new ListAllWaypointsCommand());
+		commands.add(new ListAllWarpstonesCommand());
 
 		commands.forEach(this::registerSubcommand);
 
@@ -45,7 +45,7 @@ public class CommandManager implements TabExecutor {
 	@Override
 	public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s,
 							 @NotNull String[] args) {
-		if (!(sender.hasPermission("waystones.commands.main"))) {
+		if (!(sender.hasPermission("warpstones.commands.main"))) {
 			sendError(sender, LanguageManager.getString("Commands.Failure.Cause.NoPermission"));
 			return true;
 		}

@@ -1,4 +1,4 @@
-package de.flo56958.waystones.Utilities.NBT;
+package de.flo56958.warpstones.Utilities.NBT;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;

@@ -1,10 +1,10 @@
-package de.flo56958.waystones;
+package de.flo56958.warpstones;
 
 import com.google.gson.Gson;
-import de.flo56958.waystones.Utilities.PlayerInfo;
-import de.flo56958.waystones.Utilities.SortingType;
-import de.flo56958.waystones.gui.ButtonAction;
-import de.flo56958.waystones.gui.GUI;
+import de.flo56958.warpstones.Utilities.PlayerInfo;
+import de.flo56958.warpstones.Utilities.SortingType;
+import de.flo56958.warpstones.gui.ButtonAction;
+import de.flo56958.warpstones.gui.GUI;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Shulker;
@@ -15,13 +15,13 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.io.*;
 import java.util.*;
 
-public class WaystoneManager {
+public class WarpstoneManager {
 
 	public static final HashMap<String, Long> cooldowns = new HashMap<>();
 	private static final HashMap<String, Long> playerInteractTimer = new HashMap<>();
 	private final static ItemStack forwardStack;
 	private final static ItemStack backStack;
-	private static WaystoneManager instance;
+	private static WarpstoneManager instance;
 
 	static {
 		forwardStack = new ItemStack(Material.GREEN_STAINED_GLASS_PANE, 1);
@@ -42,12 +42,12 @@ public class WaystoneManager {
 	}
 
 	private final Gson gson = new Gson();
-	//contains all Waystones
-	public List<Waystone> waystones;
-	//contains all public Waystones
-	public List<Waystone> globalWaystones;
-	//Maps a Player to his activated Waystones
-	public HashMap<String, PlayerSave> playerWaystones;
+	//contains all Warpstones
+	public List<Warpstone> warpstones;
+	//contains all public Warpstones
+	public List<Warpstone> globalWarpstones;
+	//Maps a Player to his activated Warpstones
+	public HashMap<String, PlayerSave> playerWarpstones;
 
 	public static boolean checkInteractTimer(Player player) {
 		Long time = playerInteractTimer.get(player.getUniqueId().toString());
@@ -61,22 +61,22 @@ public class WaystoneManager {
 		return false;
 	}
 
-	public synchronized static WaystoneManager getInstance() {
+	public synchronized static WarpstoneManager getInstance() {
 		if (instance == null) {
-			instance = new WaystoneManager();
+			instance = new WarpstoneManager();
 			instance.init();
 		}
 		return instance;
 	}
 
 	private void init() {
-		waystones = new ArrayList<>();
-		globalWaystones = new ArrayList<>();
+		warpstones = new ArrayList<>();
+		globalWarpstones = new ArrayList<>();
 
-		playerWaystones = new HashMap<>();
+		playerWarpstones = new HashMap<>();
 
-		//load all Waystones
-		File dir = new File(Main.plugin.getDataFolder(), "saves/Waystones");
+		//load all Warpstones
+		File dir = new File(Main.plugin.getDataFolder(), "saves/Warpstones");
 		File[] directoryListing = dir.listFiles();
 		if (directoryListing != null) {
 			for (File child : directoryListing) {
@@ -98,10 +98,10 @@ public class WaystoneManager {
 
 						String json = sb.toString();
 
-						Waystone way = gson.fromJson(json, Waystone.class);
-						waystones.add(way);
+						Warpstone way = gson.fromJson(json, Warpstone.class);
+						warpstones.add(way);
 						if (way.isGlobal) {
-							globalWaystones.add(way);
+							globalWarpstones.add(way);
 						}
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -133,7 +133,7 @@ public class WaystoneManager {
 
 						String json = sb.toString();
 						PlayerSave save = gson.fromJson(json, PlayerSave.class);
-						playerWaystones.put(child.getName().split("\\.")[0], save);
+						playerWarpstones.put(child.getName().split("\\.")[0], save);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -143,50 +143,50 @@ public class WaystoneManager {
 	}
 
 	public void save() {
-		for (Waystone waystone : waystones) {
-			saveWaystone(waystone);
+		for (Warpstone warpstone : warpstones) {
+			saveWarpstone(warpstone);
 		}
-		for (String uuid : playerWaystones.keySet()) {
+		for (String uuid : playerWarpstones.keySet()) {
 			savePlayer(uuid);
 		}
 	}
 
-	public void activateWaystone(Player p, Waystone waystone) {
-		playerWaystones.putIfAbsent(p.getUniqueId().toString(), new PlayerSave(new HashSet<>(), SortingType.ALPHABETICAL));
-		playerWaystones.get(p.getUniqueId().toString()).waystones.add(waystone.uuid);
+	public void activateWarpstone(Player p, Warpstone warpstone) {
+		playerWarpstones.putIfAbsent(p.getUniqueId().toString(), new PlayerSave(new HashSet<>(), SortingType.ALPHABETICAL));
+		playerWarpstones.get(p.getUniqueId().toString()).warpstones.add(warpstone.uuid);
 	}
 
-	public void toggleWaystone(Player p, Waystone waystone) {
-		playerWaystones.putIfAbsent(p.getUniqueId().toString(), new PlayerSave(new HashSet<>(), SortingType.ALPHABETICAL));
-		PlayerSave save = playerWaystones.get(p.getUniqueId().toString());
-		if (save.waystones.contains(waystone.uuid)) {
-			if (waystone.owner.equals(p.getUniqueId().toString()))
-				return; //owner should always have the waystone discovered
-			save.waystones.remove(waystone.uuid);
-			Main.sendActionBar(p, "Waystone " + waystone.Name + " has been undiscovered!");
+	public void toggleWarpstone(Player p, Warpstone warpstone) {
+		playerWarpstones.putIfAbsent(p.getUniqueId().toString(), new PlayerSave(new HashSet<>(), SortingType.ALPHABETICAL));
+		PlayerSave save = playerWarpstones.get(p.getUniqueId().toString());
+		if (save.warpstones.contains(warpstone.uuid)) {
+			if (warpstone.owner.equals(p.getUniqueId().toString()))
+				return; //owner should always have the warpstone discovered
+			save.warpstones.remove(warpstone.uuid);
+			Main.sendActionBar(p, "Warpstone " + warpstone.Name + " has been undiscovered!");
 		} else {
-			save.waystones.add(waystone.uuid);
-			Main.sendActionBar(p, "Waystone " + waystone.Name + " has been discovered!");
+			save.warpstones.add(warpstone.uuid);
+			Main.sendActionBar(p, "Warpstone " + warpstone.Name + " has been discovered!");
 		}
 	}
 
-	public void addWaystone(Waystone waystone) {
-		saveWaystone(waystone);
-		waystones.add(waystone);
-		if (waystone.isGlobal) {
-			globalWaystones.add(waystone);
+	public void addWarpstone(Warpstone warpstone) {
+		saveWarpstone(warpstone);
+		warpstones.add(warpstone);
+		if (warpstone.isGlobal) {
+			globalWarpstones.add(warpstone);
 		}
 	}
 
-	public void removeWaystone(Waystone waystone) {
-		waystones.remove(waystone);
-		globalWaystones.remove(waystone);
-		File file = new File(Main.plugin.getDataFolder(), "/saves/Waystones/" + waystone.uuid + ".json");
+	public void removeWarpstone(Warpstone warpstone) {
+		warpstones.remove(warpstone);
+		globalWarpstones.remove(warpstone);
+		File file = new File(Main.plugin.getDataFolder(), "/saves/Warpstones/" + warpstone.uuid + ".json");
 		if (file.exists()) file.delete();
 	}
 
 	public void savePlayer(String uuid) {
-		String str = gson.toJson(playerWaystones.get(uuid), PlayerSave.class);
+		String str = gson.toJson(playerWarpstones.get(uuid), PlayerSave.class);
 		try {
 			File file = new File(Main.plugin.getDataFolder(), "/saves/Players/" + uuid + ".json");
 			if (!file.exists()) {
@@ -200,10 +200,10 @@ public class WaystoneManager {
 		}
 	}
 
-	public void saveWaystone(Waystone waystone) {
-		String str = gson.toJson(waystone, Waystone.class);
+	public void saveWarpstone(Warpstone warpstone) {
+		String str = gson.toJson(warpstone, Warpstone.class);
 		try {
-			File file = new File(Main.plugin.getDataFolder(), "/saves/Waystones/" + waystone.uuid + ".json");
+			File file = new File(Main.plugin.getDataFolder(), "/saves/Warpstones/" + warpstone.uuid + ".json");
 			if (!file.exists()) {
 				file.createNewFile();
 			}
@@ -279,22 +279,22 @@ public class WaystoneManager {
 		}
 	}
 
-	public GUI createGUI(Waystone waystone, ItemStack warpscroll, Player p, Shulker shulker, boolean listall) {
-		PlayerSave save = playerWaystones.get(p.getUniqueId().toString());
+	public GUI createGUI(Warpstone warpstone, ItemStack warpscroll, Player p, Shulker shulker, boolean listall) {
+		PlayerSave save = playerWarpstones.get(p.getUniqueId().toString());
 		if (save == null) return null;
 
 		Location from = p.getLocation();
-		if (waystone != null)
-			from = new Location(Bukkit.getServer().getWorld(UUID.fromString(waystone.worlduuid)), waystone.x, waystone.y, waystone.z);
+		if (warpstone != null)
+			from = new Location(Bukkit.getServer().getWorld(UUID.fromString(warpstone.worlduuid)), warpstone.x, warpstone.y, warpstone.z);
 		//Gather all possible waypoints
-		HashSet<Waystone> ws;
+		HashSet<Warpstone> ws;
 		if (!listall) {
-			ws = new HashSet<>(globalWaystones);
+			ws = new HashSet<>(globalWarpstones);
 			HashSet<String> toremove = new HashSet<>();
 
 			loop:
-			for (String s : save.waystones) {
-				for (Waystone w : waystones) {
+			for (String s : save.warpstones) {
+				for (Warpstone w : warpstones) {
 					if (w.uuid.equals(s)) {
 						ws.add(w);
 						continue loop;
@@ -302,15 +302,15 @@ public class WaystoneManager {
 				}
 				toremove.add(s);
 			}
-			save.waystones.removeAll(toremove);
+			save.warpstones.removeAll(toremove);
 		} else {
-			ws = new HashSet<>(waystones);
+			ws = new HashSet<>(warpstones);
 		}
 
-		HashMap<Waystone, Long> distances = new HashMap<>();
-		HashMap<Waystone, Double> costs = new HashMap<>();
+		HashMap<Warpstone, Long> distances = new HashMap<>();
+		HashMap<Warpstone, Double> costs = new HashMap<>();
 
-		for (Waystone w : ws) {
+		for (Warpstone w : ws) {
 			//calculate distance
 			int dx = w.x - from.getBlockX();
 			int dy = w.y - from.getBlockY();
@@ -328,7 +328,7 @@ public class WaystoneManager {
 			costs.put(w, cost);
 		}
 
-		ArrayList<Waystone> wslist = new ArrayList<>(ws);
+		ArrayList<Warpstone> wslist = new ArrayList<>(ws);
 		switch (save.sortingType) {
 			case ALPHABETICAL:
 				wslist.sort(Comparator.comparing(x -> x.Name));
@@ -348,18 +348,18 @@ public class WaystoneManager {
 		GUI gui = new GUI();
 		int windowindex = 1;
 		boolean done = false;
-		boolean isOwner = waystone != null && (waystone.owner.equals(p.getUniqueId().toString())
-				|| p.hasPermission("waystones.admin"));
+		boolean isOwner = warpstone != null && (warpstone.owner.equals(p.getUniqueId().toString())
+				|| p.hasPermission("warpstones.admin"));
 		GUI customizeGUI = null;
 		if (isOwner) {
 			customizeGUI = new GUI();
-			GUI.Window window = customizeGUI.addWindow(3, "Customizer - " + waystone.Name);
-			Waystone finalWaystone = waystone;
+			GUI.Window window = customizeGUI.addWindow(3, "Customizer - " + warpstone.Name);
+			Warpstone finalWarpstone = warpstone;
 			{
 				//Rename Waypoint
 				ItemStack nameritem = new ItemStack(Material.PAPER);
 				ItemMeta meta = nameritem.getItemMeta();
-				meta.setDisplayName("Rename Waypoint");
+				meta.setDisplayName("Rename Warpstone");
 				ArrayList<String> lore = new ArrayList<>();
 				lore.add(ChatColor.WHITE + "Send the Name in Chat!");
 				meta.setLore(lore);
@@ -368,19 +368,19 @@ public class WaystoneManager {
 				namer.addAction(ClickType.LEFT, new ButtonAction.REQUEST_INPUT(namer, (pl, input) -> {
 					input = input.replaceAll("&", "§");
 					//TODO: Naming Blacklist
-					finalWaystone.Name = input;
+					finalWarpstone.Name = input;
 					if (shulker.isCustomNameVisible()) shulker.setCustomName(input);
 				}, ""));
 			}
 			{
 				//Set Waypoint Global
-				ItemStack globalitem = (waystone.isGlobal) ? new ItemStack(Material.GREEN_WOOL) : new ItemStack(Material.RED_WOOL);
+				ItemStack globalitem = (warpstone.isGlobal) ? new ItemStack(Material.GREEN_WOOL) : new ItemStack(Material.RED_WOOL);
 				ItemMeta meta = globalitem.getItemMeta();
 				meta.setDisplayName("Toggle Global Setting");
 				List<String> lore = new ArrayList<>();
-				lore.add(ChatColor.WHITE + "Should the waypoint be seen by everyone?");
+				lore.add(ChatColor.WHITE + "Should the warpstone be seen by everyone?");
 				double cost = 0;
-				if (!p.hasPermission("waystones.gobal")) {
+				if (!p.hasPermission("warpstones.gobal")) {
 					cost = Main.plugin.getConfig().getDouble("MakeGlobalCost", 100);
 					String scost = "Cost: ";
 					if (Main.useVault) {
@@ -401,32 +401,32 @@ public class WaystoneManager {
 				double finalCost = cost;
 				global.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(global, () -> {
 					if (finalGlobalitem.getType() == Material.RED_WOOL) { //Toggle on
-						finalWaystone.isGlobal = true;
-						WaystoneManager.getInstance().globalWaystones.add(finalWaystone);
+						finalWarpstone.isGlobal = true;
+						WarpstoneManager.getInstance().globalWarpstones.add(finalWarpstone);
 						finalGlobalitem.setType(Material.GREEN_WOOL);
 						withdraw(p, finalCost);
 					} else if (finalGlobalitem.getType() == Material.GREEN_WOOL) { //Toggle off
-						finalWaystone.isGlobal = false;
-						WaystoneManager.getInstance().globalWaystones.remove(finalWaystone);
+						finalWarpstone.isGlobal = false;
+						WarpstoneManager.getInstance().globalWarpstones.remove(finalWarpstone);
 						finalGlobalitem.setType(Material.RED_WOOL);
 					}
 				}));
 			}
 			{
-				//Change Waypoint Color
+				//Change Warpstone Color
 				ItemStack coloritem = new ItemStack(Material.WHITE_WOOL);
 				ItemMeta meta = coloritem.getItemMeta();
-				meta.setDisplayName("Change Waypoint Color");
+				meta.setDisplayName("Change Warpstone Color");
 				coloritem.setItemMeta(meta);
 				GUI.Window.Button color = window.addButton(6, 1, coloritem);
 				color.addAction(ClickType.LEFT, new ButtonAction.PAGE_UP(color));
 
-				GUI.Window colorWindow = customizeGUI.addWindow(2, "Choose Color for " + waystone.Name);
+				GUI.Window colorWindow = customizeGUI.addWindow(2, "Choose Color for " + warpstone.Name);
 				int index = 0;
 				ArrayList<DyeColor> colors = new ArrayList(Arrays.asList(DyeColor.values()));
 				colors.add(null);
 				for (DyeColor c : colors) {
-					ItemStack col = WaystoneManager.getInstance().getShulkerboxFromColor(c);
+					ItemStack col = WarpstoneManager.getInstance().getShulkerboxFromColor(c);
 					meta = col.getItemMeta();
 					if (c != null) meta.setDisplayName(c.name());
 					else meta.setDisplayName("NORMAL");
@@ -434,21 +434,21 @@ public class WaystoneManager {
 					GUI.Window.Button but = colorWindow.addButton(index++, col);
 					but.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(but, () -> {
 						shulker.setColor(c);
-						finalWaystone.color = c;
+						finalWarpstone.color = c;
 					}));
 				}
 			}
 			{
-				//Remove Waystone
+				//Remove Warpstone
 				ItemStack removeItem = new ItemStack(Material.BEDROCK);
 				ItemMeta meta = removeItem.getItemMeta();
-				meta.setDisplayName("Remove Waystone");
+				meta.setDisplayName("Remove Warpstone");
 				removeItem.setItemMeta(meta);
 				GUI.Window.Button remove = window.addButton(5, 2, removeItem);
 				GUI finalCustomizeGUI = customizeGUI;
 				remove.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(remove, () -> {
-					WaystoneManager.getInstance().removeWaystone(finalWaystone);
-					shulker.getWorld().dropItemNaturally(shulker.getLocation(), Main.waystoneItem);
+					WarpstoneManager.getInstance().removeWarpstone(finalWarpstone);
+					shulker.getWorld().dropItemNaturally(shulker.getLocation(), Main.warpstoneItem);
 					shulker.remove();
 					finalCustomizeGUI.close();
 				}));
@@ -468,15 +468,15 @@ public class WaystoneManager {
 					if (player == null) {
 						pl.sendMessage(ChatColor.RED + "Player was not found or not online!");
 					} else {
-						if (!player.hasPermission("waystones.place")) {
+						if (!player.hasPermission("warpstones.place")) {
 							pl.sendMessage(ChatColor.RED + player.getDisplayName() + "does not have the necessary permissions!");
 							return;
 						}
-						finalWaystone.owner = player.getUniqueId().toString();
+						finalWarpstone.owner = player.getUniqueId().toString();
 						pl.sendMessage(ChatColor.WHITE + "Transferred successfully to " + input + "!");
-						player.sendMessage(ChatColor.WHITE + "You have been given ownership of the waypoint "
-								+ finalWaystone.Name + " from " + pl.getName() + "!");
-						WaystoneManager.getInstance().activateWaystone(player, finalWaystone);
+						player.sendMessage(ChatColor.WHITE + "You have been given ownership of the warpstone "
+								+ finalWarpstone.Name + " from " + pl.getName() + "!");
+						WarpstoneManager.getInstance().activateWarpstone(player, finalWarpstone);
 					}
 				}, ""));
 			}
@@ -494,7 +494,7 @@ public class WaystoneManager {
 				nametag.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(nametag, () -> {
 					if (finalNametagItem.getType() == Material.RED_WOOL) { //Toggle on
 						shulker.setCustomNameVisible(true);
-						shulker.setCustomName(finalWaystone.Name);
+						shulker.setCustomName(finalWarpstone.Name);
 						finalNametagItem.setType(Material.GREEN_WOOL);
 					} else if (finalNametagItem.getType() == Material.GREEN_WOOL) { //Toggle off
 						shulker.setCustomNameVisible(false);
@@ -504,8 +504,8 @@ public class WaystoneManager {
 				}));
 			}
 			{
-				//Lock Waystone
-				ItemStack lockitem = (waystone.locked) ? new ItemStack(Material.GREEN_WOOL) : new ItemStack(Material.RED_WOOL);
+				//Lock Warpstone
+				ItemStack lockitem = (warpstone.locked) ? new ItemStack(Material.GREEN_WOOL) : new ItemStack(Material.RED_WOOL);
 				ItemMeta meta = lockitem.getItemMeta();
 				meta.setDisplayName("Toggle Locking of Warpstone");
 				List<String> lore = new ArrayList<>();
@@ -517,10 +517,10 @@ public class WaystoneManager {
 				lock.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(lock, () -> {
 					if (finalNametagItem.getType() == Material.RED_WOOL) { //Toggle on
 						finalNametagItem.setType(Material.GREEN_WOOL);
-						finalWaystone.locked = true;
+						finalWarpstone.locked = true;
 					} else if (finalNametagItem.getType() == Material.GREEN_WOOL) { //Toggle off
 						finalNametagItem.setType(Material.RED_WOOL);
-						finalWaystone.locked = true;
+						finalWarpstone.locked = true;
 					}
 				}));
 			}
@@ -530,7 +530,7 @@ public class WaystoneManager {
 
 		while (!done) {
 			String title = "Selector #" + windowindex++ + " - ";
-			title += (waystone == null) ? "Warpscroll" : waystone.Name;
+			title += (warpstone == null) ? "Warpscroll" : warpstone.Name;
 			GUI.Window currentPage = gui.addWindow(6, title);
 
 			if (isOwner) {
@@ -569,18 +569,18 @@ public class WaystoneManager {
 
 			int index = 0;
 			while (!wslist.isEmpty() && index < 45) {
-				Waystone item = wslist.get(0);
+				Warpstone item = wslist.get(0);
 				wslist.remove(0);
 				if (item == null) continue;
-				if (item.equals(waystone)) continue;
+				if (item.equals(warpstone)) continue;
 
-				ItemStack stack = WaystoneManager.getInstance().getShulkerboxFromColor(item.color);
+				ItemStack stack = WarpstoneManager.getInstance().getShulkerboxFromColor(item.color);
 				ItemMeta meta = stack.getItemMeta();
 				meta.setDisplayName(item.Name);
 				List<String> lore = new ArrayList<>();
 				String playername = Bukkit.getOfflinePlayer(UUID.fromString(item.owner)).getName();
 				lore.add(ChatColor.WHITE + "Owner: " + playername);
-				if (item.isGlobal) lore.add(ChatColor.WHITE + "Global Waystone");
+				if (item.isGlobal) lore.add(ChatColor.WHITE + "Global Warpstone");
 				lore.add(ChatColor.WHITE + "World: " + Bukkit.getServer().getWorld(UUID.fromString(item.worlduuid)).getName());
 				lore.add(ChatColor.WHITE + "Location: " + item.x + " " + item.y + " " + item.z);
 
@@ -598,7 +598,7 @@ public class WaystoneManager {
 
 				//check for locked Warpstone
 				if(item.locked && !(item.owner.equals(p.getUniqueId().toString())
-						|| p.hasPermission("waystones.admin"))) {
+						|| p.hasPermission("warpstones.admin"))) {
 					canTeleport = false;
 					lore.add(((item.isGlobal) ? 2 : 1), ChatColor.RED + "" + ChatColor.BOLD + "Locked Warpstone");
 				}
@@ -608,7 +608,7 @@ public class WaystoneManager {
 
 				GUI.Window.Button but = currentPage.addButton(index, stack);
 				if (canTeleport) {
-					if (waystone != null || listall) {
+					if (warpstone != null || listall) {
 						but.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(but, () -> {
 							withdraw(p, cost);
 							Location loc = new Location(Bukkit.getWorld(UUID.fromString(item.worlduuid)), item.x, item.y + 1, item.z);

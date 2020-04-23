@@ -1,12 +1,12 @@
-package de.flo56958.waystones;
+package de.flo56958.warpstones;
 
-import de.flo56958.waystones.Listeners.CraftingGridListener;
-import de.flo56958.waystones.Listeners.WarpscrollListener;
-import de.flo56958.waystones.Listeners.WaystoneListener;
-import de.flo56958.waystones.Listeners.WorldSaveListener;
-import de.flo56958.waystones.Utilities.LanguageManager;
-import de.flo56958.waystones.Utilities.NBT.NBTUtilitiesReflections;
-import de.flo56958.waystones.commands.CommandManager;
+import de.flo56958.warpstones.Listeners.CraftingGridListener;
+import de.flo56958.warpstones.Listeners.WarpscrollListener;
+import de.flo56958.warpstones.Listeners.WarpstoneListener;
+import de.flo56958.warpstones.Listeners.WorldSaveListener;
+import de.flo56958.warpstones.Utilities.LanguageManager;
+import de.flo56958.warpstones.Utilities.NBT.NBTUtilitiesReflections;
+import de.flo56958.warpstones.commands.CommandManager;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.milkbowl.vault.economy.Economy;
@@ -30,7 +30,7 @@ import java.util.logging.Level;
 public final class Main extends JavaPlugin {
 
 	public static JavaPlugin plugin;
-	public static ItemStack waystoneItem;
+	public static ItemStack warpstoneItem;
 	public static ItemStack warpscrollItem;
 
 	//TODO: Player should decide if XP or Vault
@@ -39,13 +39,13 @@ public final class Main extends JavaPlugin {
 	public static Economy econ = null;
 
 	static {
-		waystoneItem = new ItemStack(Material.SHULKER_SHELL);
-		ItemMeta meta = waystoneItem.getItemMeta();
-		meta.setDisplayName("Waystone");
-		waystoneItem.setItemMeta(meta);
-		NBTUtilitiesReflections nbts = new NBTUtilitiesReflections(waystoneItem);
-		nbts.setInt("Waystone", 56958);
-		NBTUtilitiesReflections.setNBTTagCompound(waystoneItem, nbts.getNBTTagCompound());
+		warpstoneItem = new ItemStack(Material.SHULKER_SHELL);
+		ItemMeta meta = warpstoneItem.getItemMeta();
+		meta.setDisplayName("Warpstone");
+		warpstoneItem.setItemMeta(meta);
+		NBTUtilitiesReflections nbts = new NBTUtilitiesReflections(warpstoneItem);
+		nbts.setInt("Warpstone", 56958);
+		NBTUtilitiesReflections.setNBTTagCompound(warpstoneItem, nbts.getNBTTagCompound());
 
 		warpscrollItem = new ItemStack(Material.PAPER);
 		meta = warpscrollItem.getItemMeta();
@@ -60,7 +60,7 @@ public final class Main extends JavaPlugin {
 	public void onEnable() {
 		plugin = this;
 		//Setting up folder structure
-		File file = new File(this.getDataFolder(), "saves/Waystones");
+		File file = new File(this.getDataFolder(), "saves/Warpstones");
 		file.mkdirs();
 		file = new File(this.getDataFolder(), "saves/Players");
 		file.mkdirs();
@@ -72,16 +72,16 @@ public final class Main extends JavaPlugin {
 		useVault = setupEconomy();
 		if (useVault) Bukkit.getLogger().log(Level.INFO, "Found and enabled Vault!");
 
-		//Setting up WaystoneManager
-		WaystoneManager.getInstance();
+		//Setting up WarpstoneManager
+		WarpstoneManager.getInstance();
 
 		//Setting up Commands
 		CommandManager cmd = new CommandManager();
-		this.getCommand("waystones").setExecutor(cmd);
-		this.getCommand("waystones").setTabCompleter(cmd);
+		this.getCommand("warpstones").setExecutor(cmd);
+		this.getCommand("warpstones").setTabCompleter(cmd);
 
 		//Setting up Listeners
-		Bukkit.getPluginManager().registerEvents(new WaystoneListener(), this);
+		Bukkit.getPluginManager().registerEvents(new WarpstoneListener(), this);
 		if (getConfig().getBoolean("AutoSave", true)) Bukkit.getPluginManager().registerEvents(new WorldSaveListener(), this);
 		Bukkit.getPluginManager().registerEvents(new CraftingGridListener(), this);
 
@@ -92,7 +92,7 @@ public final class Main extends JavaPlugin {
 			recipeMaterials.put("S", Material.SHULKER_SHELL.name());
 			recipeMaterials.put("N", Material.NETHER_STAR.name());
 
-			config.addDefault("WaystoneRecipe.Materials", recipeMaterials);
+			config.addDefault("WarpstoneRecipe.Materials", recipeMaterials);
 		}
 		{
 			Map<String, String> recipeMaterials = new HashMap<>();
@@ -103,12 +103,12 @@ public final class Main extends JavaPlugin {
 		}
 		saveConfig();
 		try {
-			NamespacedKey nkey = new NamespacedKey(Main.plugin, "Waystone");
-			ShapedRecipe newRecipe = new ShapedRecipe(nkey, waystoneItem);
-			String top = config.getString("WaystoneRecipe.Top");
-			String middle = config.getString("WaystoneRecipe.Middle");
-			String bottom = config.getString("WaystoneRecipe.Bottom");
-			ConfigurationSection materials = config.getConfigurationSection("WaystoneRecipe.Materials");
+			NamespacedKey nkey = new NamespacedKey(Main.plugin, "Warpstone");
+			ShapedRecipe newRecipe = new ShapedRecipe(nkey, warpstoneItem);
+			String top = config.getString("WarpstoneRecipe.Top");
+			String middle = config.getString("WarpstoneRecipe.Middle");
+			String bottom = config.getString("WarpstoneRecipe.Bottom");
+			ConfigurationSection materials = config.getConfigurationSection("WarpstoneRecipe.Materials");
 
 			newRecipe.shape(top, middle, bottom);
 
@@ -172,6 +172,6 @@ public final class Main extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		// Save all
-		WaystoneManager.getInstance().save();
+		WarpstoneManager.getInstance().save();
 	}
 }

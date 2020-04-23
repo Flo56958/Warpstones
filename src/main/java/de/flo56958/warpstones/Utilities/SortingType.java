@@ -1,4 +1,4 @@
-package de.flo56958.waystones.Utilities;
+package de.flo56958.warpstones.Utilities;
 
 public enum SortingType {
 	ALPHABETICAL,

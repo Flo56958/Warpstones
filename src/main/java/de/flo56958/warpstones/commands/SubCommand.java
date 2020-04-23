@@ -1,4 +1,4 @@
-package de.flo56958.waystones.commands;
+package de.flo56958.warpstones.commands;
 
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;

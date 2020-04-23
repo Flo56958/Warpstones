@@ -1,6 +1,6 @@
-package de.flo56958.waystones.Listeners;
+package de.flo56958.warpstones.Listeners;
 
-import de.flo56958.waystones.Utilities.NBT.NBTUtilitiesReflections;
+import de.flo56958.warpstones.Utilities.NBT.NBTUtilitiesReflections;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -17,7 +17,7 @@ public class CraftingGridListener implements Listener {
 			NBTUtilitiesReflections nbts = new NBTUtilitiesReflections(is);
 			if (!nbts.hasNBT()) continue;
 
-			if (nbts.getInt("Warpscroll") == 56958 || nbts.getInt("Waystone") == 56958) {
+			if (nbts.getInt("Warpscroll") == 56958 || nbts.getInt("Warpstone") == 56958) {
 				inv.setResult(null);
 				break;
 			}

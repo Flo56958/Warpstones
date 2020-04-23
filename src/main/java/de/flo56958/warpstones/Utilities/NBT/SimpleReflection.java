@@ -1,4 +1,4 @@
-package de.flo56958.waystones.Utilities.NBT;
+package de.flo56958.warpstones.Utilities.NBT;
 
 import java.lang.reflect.*;
 import java.util.LinkedList;

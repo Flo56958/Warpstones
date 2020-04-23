@@ -1,6 +1,6 @@
-package de.flo56958.waystones.Utilities;
+package de.flo56958.warpstones.Utilities;
 
-import de.flo56958.waystones.Main;
+import de.flo56958.warpstones.Main;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +34,7 @@ public class LanguageManager {
 		if (langFile == null) {
 			langFile = langBackup;
 			usingFallback = true;
-			ChatWriter.logError(lang + " is currently not supported. If you want Waystones to support this language you can help translating on Transifex!");
+			ChatWriter.logError(lang + " is currently not supported. If you want Warpstones to support this language you can help translating on Transifex!");
 		} else ChatWriter.logInfo(getString("LanguageManager.LoadedLanguage").replaceFirst("%lang", lang));
 	}
 

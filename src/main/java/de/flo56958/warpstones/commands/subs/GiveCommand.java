@@ -1,10 +1,10 @@
-package de.flo56958.waystones.commands.subs;
+package de.flo56958.warpstones.commands.subs;
 
-import de.flo56958.waystones.Main;
-import de.flo56958.waystones.Utilities.LanguageManager;
-import de.flo56958.waystones.commands.ArgumentType;
-import de.flo56958.waystones.commands.CommandManager;
-import de.flo56958.waystones.commands.SubCommand;
+import de.flo56958.warpstones.Main;
+import de.flo56958.warpstones.Utilities.LanguageManager;
+import de.flo56958.warpstones.commands.ArgumentType;
+import de.flo56958.warpstones.commands.CommandManager;
+import de.flo56958.warpstones.commands.SubCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
@@ -51,9 +51,9 @@ public class GiveCommand implements SubCommand {
 			return true;
 		}
 
-		if (item.equalsIgnoreCase("waystone")) {
-			if (player.getInventory().addItem(Main.waystoneItem.clone()).size() != 0) { //adds items to (full) inventory
-				player.getWorld().dropItem(player.getLocation(), Main.waystoneItem.clone());
+		if (item.equalsIgnoreCase("warpstone")) {
+			if (player.getInventory().addItem(Main.warpstoneItem.clone()).size() != 0) { //adds items to (full) inventory
+				player.getWorld().dropItem(player.getLocation(), Main.warpstoneItem.clone());
 			} // no else as it gets added in if
 			return true;
 		} else if (item.equalsIgnoreCase("warpscroll")) {
@@ -92,7 +92,7 @@ public class GiveCommand implements SubCommand {
 				}
 				break;
 			case 3:
-				result.add("waystone");
+				result.add("warpstone");
 				result.add("warpscroll");
 				result.add("sword");
 				break;
@@ -119,7 +119,7 @@ public class GiveCommand implements SubCommand {
 	@Override
 	@NotNull
 	public String getPermission() {
-		return "waystones.commands.give";
+		return "warpstones.commands.give";
 	}
 
 	@Override

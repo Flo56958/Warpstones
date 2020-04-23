@@ -1,11 +1,11 @@
-package de.flo56958.waystones.commands.subs;
+package de.flo56958.warpstones.commands.subs;
 
-import de.flo56958.waystones.Utilities.LanguageManager;
-import de.flo56958.waystones.WaystoneManager;
-import de.flo56958.waystones.commands.ArgumentType;
-import de.flo56958.waystones.commands.CommandManager;
-import de.flo56958.waystones.commands.SubCommand;
-import de.flo56958.waystones.gui.GUI;
+import de.flo56958.warpstones.Utilities.LanguageManager;
+import de.flo56958.warpstones.WarpstoneManager;
+import de.flo56958.warpstones.commands.ArgumentType;
+import de.flo56958.warpstones.commands.CommandManager;
+import de.flo56958.warpstones.commands.SubCommand;
+import de.flo56958.warpstones.gui.GUI;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -20,12 +20,12 @@ import java.util.Map;
  * Syntax of /ws listallwaypoints:
  * 		/ws listallwaypoints
  */
-public class ListAllWaypointsCommand implements SubCommand {
+public class ListAllWarpstonesCommand implements SubCommand {
 
 	@Override
 	public boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
 		if (sender instanceof Player) {
-			GUI gui = WaystoneManager.getInstance().createGUI(null, null, (Player) sender, null, true);
+			GUI gui = WarpstoneManager.getInstance().createGUI(null, null, (Player) sender, null, true);
 			gui.show((Player) sender);
 			return true;
 		}
@@ -43,7 +43,7 @@ public class ListAllWaypointsCommand implements SubCommand {
 	@Override
 	@NotNull
 	public String getName() {
-		return "listallwaypoints";
+		return "listallwarpstones";
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class ListAllWaypointsCommand implements SubCommand {
 	@Override
 	@NotNull
 	public String getPermission() {
-		return "waystones.commands.listallwaypoints";
+		return "warpstones.commands.listallwarpstones";
 	}
 
 	@Override
@@ -71,6 +71,6 @@ public class ListAllWaypointsCommand implements SubCommand {
 	@Override
 	@NotNull
 	public String syntax() {
-		return "/ws listallwaypoints";
+		return "/ws listallwarpstones";
 	}
 }

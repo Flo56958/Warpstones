@@ -1,6 +1,6 @@
-name: Waystones
+name: Warpstones
 version: ${project.version}
-main: de.flo56958.waystones.Main
+main: de.flo56958.warpstones.Main
 api-version: 1.13
 authors: [Flo56958]
 description: A survival immersive warping alternative.
@@ -9,64 +9,63 @@ softdepend:
   - Vault
 
 commands:
-  waystones:
+  warpstones:
     aliases: [ws]
-    description: Main Command of Waystones
-    usage: /waystones [sub]
+    description: Main Command of Warpstones
+    usage: /warpstones [sub]
 
 permissions:
-  waystones.*:
+  warpstones.*:
     children:
-      waystones.place: true
-      waystones.use: true
-      waystones.warpscroll.use: true
-      waystones.gobal: true
-      waystones.admin: true
-      waystones.commands.*: true
+      warpstones.place: true
+      warpstones.use: true
+      warpstones.warpscroll.use: true
+      warpstones.gobal: true
+      warpstones.admin: true
+      warpstones.commands.*: true
 
-  waystones.commands.*:
+  warpstones.commands.*:
     children:
-      waystones.commands.main: true
-      waystones.commands.give: true
-      waystones.commands.listallwaypoints: true
+      warpstones.commands.main: true
+      warpstones.commands.give: true
+      warpstones.commands.listallwaypoints: true
 
-  waystones.commands.main:
+  warpstones.commands.main:
     default: true
 
-  waystones.commands.give:
+  warpstones.commands.give:
     children:
-      waystones.commands.main: true
+      warpstones.commands.main: true
     default: op
 
-  waystones.commands.listallwaypoints:
+  warpstones.commands.listallwaypoints:
     children:
-      waystones.commands.main: true
+      warpstones.commands.main: true
     default: op
 
-
-  waystones.admin:
+  warpstones.admin:
     children:
-      waystones.global: true
+      warpstones.global: true
     default: op
 
-  waystones.gobal:
+  warpstones.gobal:
     children:
-      waystones.place: true
+      warpstones.place: true
     default: false
 
-  waystones.place:
+  warpstones.place:
     children:
-      waystones.discover: true
+      warpstones.discover: true
     default: true
 
-  waystones.discover:
+  warpstones.discover:
     children:
-      waystones.use: true
-      waystones.warpscroll.use: true
+      warpstones.use: true
+      warpstones.warpscroll.use: true
     default: true
 
-  waystones.use:
+  warpstones.use:
     default: true
 
-  waystones.warpscroll.use:
+  warpstones.warpscroll.use:
     default: true

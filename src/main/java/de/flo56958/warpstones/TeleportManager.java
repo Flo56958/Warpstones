@@ -1,4 +1,4 @@
-package de.flo56958.waystones;
+package de.flo56958.warpstones;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

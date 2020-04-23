@@ -1,4 +1,4 @@
-package de.flo56958.waystones.commands;
+package de.flo56958.warpstones.commands;
 
 public enum ArgumentType {
 	COLORED_TEXT, //Text with ChatColors, e.g. &a

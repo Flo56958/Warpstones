@@ -1,11 +1,10 @@
-package de.flo56958.waystones.Listeners;
+package de.flo56958.warpstones.Listeners;
 
-import de.flo56958.waystones.Main;
-import de.flo56958.waystones.Utilities.ChatWriter;
-import de.flo56958.waystones.Utilities.NBT.NBTUtilitiesReflections;
-import de.flo56958.waystones.Waystone;
-import de.flo56958.waystones.WaystoneManager;
-import de.flo56958.waystones.gui.GUI;
+import de.flo56958.warpstones.Main;
+import de.flo56958.warpstones.Utilities.NBT.NBTUtilitiesReflections;
+import de.flo56958.warpstones.Warpstone;
+import de.flo56958.warpstones.WarpstoneManager;
+import de.flo56958.warpstones.gui.GUI;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -24,7 +23,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
-public class WaystoneListener implements Listener {
+public class WarpstoneListener implements Listener {
 
 	@EventHandler (priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onPlace(PlayerInteractEvent e) {
@@ -38,18 +37,18 @@ public class WaystoneListener implements Listener {
 		NBTUtilitiesReflections nbts = new NBTUtilitiesReflections(stack);
 		if (!nbts.hasNBT()) return;
 
-		if (nbts.getInt("Waystone") != 56958) return;
+		if (nbts.getInt("Warpstone") != 56958) return;
 
-		if (!e.getPlayer().hasPermission("waystones.place")) return;
+		if (!e.getPlayer().hasPermission("warpstone.place")) return;
 
-		//checking if maximum waypoints are reached
-		if (WaystoneManager.getInstance().waystones.size() >= Main.plugin.getConfig().getInt("MaximumWaypoints")) {
-			Main.sendActionBar(e.getPlayer(), "Waystone can't be placed as the maximum amount of Waypoint is reached!");
+		//checking if maximum warpstones are reached
+		if (WarpstoneManager.getInstance().warpstones.size() >= Main.plugin.getConfig().getInt("MaximumWarpstones")) {
+			Main.sendActionBar(e.getPlayer(), "Warpstone can't be placed as the maximum amount of Waypoint is reached!");
 			return;
 		}
 
-		//ITEM is Waypointmarker
-		//creating Waypoint
+		//ITEM is Warpstonemarker
+		//creating Warpstone
 
 		Location loc = e.getClickedBlock().getLocation().clone();
 		switch (e.getBlockFace()) {
@@ -75,35 +74,35 @@ public class WaystoneListener implements Listener {
 				return;
 		}
 
-		//Checking for Waystones already in this location
-		for (Waystone waystone : WaystoneManager.getInstance().waystones) {
-			if (loc.getWorld().getName().equals(waystone.Name) && loc.getBlockX() == waystone.x
-					&& loc.getBlockY() == waystone.y && loc.getBlockZ() == waystone.z) {
-				Main.sendActionBar(e.getPlayer(), "Waystone can't be placed as the space is already occupied!");
+		//Checking for Warpstones already in this location
+		for (Warpstone warpstone : WarpstoneManager.getInstance().warpstones) {
+			if (loc.getWorld().getName().equals(warpstone.Name) && loc.getBlockX() == warpstone.x
+					&& loc.getBlockY() == warpstone.y && loc.getBlockZ() == warpstone.z) {
+				Main.sendActionBar(e.getPlayer(), "Warpstone can't be placed as the space is already occupied!");
 				return;
 			}
 		}
 
 		Entity ent = loc.getWorld().spawnEntity(loc, EntityType.SHULKER);
 		if (ent instanceof Shulker) {
-			Waystone waystone = new Waystone();
+			Warpstone warpstone = new Warpstone();
 			Shulker shulker = (Shulker) ent;
-			waystone.uuid = shulker.getUniqueId().toString();
-			waystone.Name = stack.getItemMeta().getDisplayName();
-			waystone.worlduuid = loc.getWorld().getUID().toString();
-			waystone.owner = e.getPlayer().getUniqueId().toString();
-			waystone.color = shulker.getColor();
-			waystone.x = loc.getBlockX();
-			waystone.y = loc.getBlockY();
-			waystone.z = loc.getBlockZ();
+			warpstone.uuid = shulker.getUniqueId().toString();
+			warpstone.Name = stack.getItemMeta().getDisplayName();
+			warpstone.worlduuid = loc.getWorld().getUID().toString();
+			warpstone.owner = e.getPlayer().getUniqueId().toString();
+			warpstone.color = shulker.getColor();
+			warpstone.x = loc.getBlockX();
+			warpstone.y = loc.getBlockY();
+			warpstone.z = loc.getBlockZ();
 			shulker.setAI(false);
 			shulker.setInvulnerable(true);
 			shulker.setCustomName(stack.getItemMeta().getDisplayName());
 			shulker.setCustomNameVisible(true);
 			shulker.setSilent(true);
 
-			WaystoneManager.getInstance().addWaystone(waystone);
-			WaystoneManager.getInstance().activateWaystone(e.getPlayer(), waystone);
+			WarpstoneManager.getInstance().addWarpstone(warpstone);
+			WarpstoneManager.getInstance().activateWarpstone(e.getPlayer(), warpstone);
 			if (e.getPlayer().getGameMode() != GameMode.CREATIVE) stack.setAmount(stack.getAmount() - 1);
 		}
 	}
@@ -117,14 +116,14 @@ public class WaystoneListener implements Listener {
 		Shulker shulker = (Shulker) e.getRightClicked();
 		if (shulker.hasAI()) return;
 
-		Waystone waystone = null;
-		for (Waystone way : WaystoneManager.getInstance().waystones) {
-			if (way.uuid.equals(shulker.getUniqueId().toString())) {
-				waystone = way;
+		Warpstone warpstone = null;
+		for (Warpstone warp : WarpstoneManager.getInstance().warpstones) {
+			if (warp.uuid.equals(shulker.getUniqueId().toString())) {
+				warpstone = warp;
 				break;
 			}
 		}
-		if (waystone == null) return;
+		if (warpstone == null) return;
 
 		//Naming the Shulker is not possible with Nametag
 		if (itemInMainHand != null && itemInMainHand.getType() == Material.NAME_TAG) {
@@ -138,24 +137,23 @@ public class WaystoneListener implements Listener {
 		e.setCancelled(true);
 
 		//As the event always triggers two times
-		if (WaystoneManager.checkInteractTimer(e.getPlayer())) return;
+		if (WarpstoneManager.checkInteractTimer(e.getPlayer())) return;
 
 		if (e.getPlayer().isSneaking()) { //only activation
-			if (!e.getPlayer().hasPermission("waystones.discover")) return;
-			WaystoneManager.getInstance().toggleWaystone(e.getPlayer(), waystone);
+			if (!e.getPlayer().hasPermission("warpstones.discover")) return;
+			WarpstoneManager.getInstance().toggleWarpstone(e.getPlayer(), warpstone);
 		} else { //GUI and Teleport options and activation
-			if (!e.getPlayer().hasPermission("waystones.use")) return;
-			WaystoneManager.getInstance().activateWaystone(e.getPlayer(), waystone);
+			if (!e.getPlayer().hasPermission("warpstones.use")) return;
+			WarpstoneManager.getInstance().activateWarpstone(e.getPlayer(), warpstone);
 
-			if (waystone.locked && !(waystone.owner.equals(e.getPlayer().getUniqueId().toString())
-					|| e.getPlayer().hasPermission("waystones.admin"))) {
+			if (warpstone.locked && !(warpstone.owner.equals(e.getPlayer().getUniqueId().toString())
+					|| e.getPlayer().hasPermission("warpstones.admin"))) {
 				Main.sendActionBar(e.getPlayer(), ChatColor.RED + "Warpstone is locked by Owner!");
 				return;
 			}
 
-			GUI gui = WaystoneManager.getInstance().createGUI(waystone, null, e.getPlayer(), shulker, false);
-
-			gui.show(e.getPlayer());
+			GUI gui = WarpstoneManager.getInstance().createGUI(warpstone, null, e.getPlayer(), shulker, false);
+			if (gui != null) gui.show(e.getPlayer());
 		}
 
 	}
@@ -167,16 +165,16 @@ public class WaystoneListener implements Listener {
 
 		UUID id = e.getEntity().getUniqueId();
 
-		Waystone toremove = null;
-		for (Waystone waystone : WaystoneManager.getInstance().waystones) {
-			if (waystone.uuid.equals(id.toString())) {
-				toremove = waystone;
+		Warpstone toremove = null;
+		for (Warpstone warpstone : WarpstoneManager.getInstance().warpstones) {
+			if (warpstone.uuid.equals(id.toString())) {
+				toremove = warpstone;
 				break;
 			}
 		}
 
 		if (toremove != null) {
-			WaystoneManager.getInstance().removeWaystone(toremove);
+			WarpstoneManager.getInstance().removeWarpstone(toremove);
 			e.getDrops().clear();
 		}
 	}

@@ -1,6 +1,6 @@
-package de.flo56958.waystones.gui;
+package de.flo56958.warpstones.gui;
 
-import de.flo56958.waystones.Main;
+import de.flo56958.warpstones.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;

@@ -1,8 +1,8 @@
-package de.flo56958.waystones;
+package de.flo56958.warpstones;
 
 import org.bukkit.DyeColor;
 
-public class Waystone {
+public class Warpstone {
 
 	public String worlduuid;
 	public int x;

@@ -1,20 +1,20 @@
-chat-prefix: '[Waystones]'
+chat-prefix: '[Warpstones]'
 Language: en_US
 chat-messages: true
 EnablePlayerLocale: false
 FreeTeleportRange: 150
 CostPerBlock: 1.00
 InterdimensionalTravelCost: 500
-MaximumWaypoints: 256
+MaximumWarpstones: 256
 EnvironmentEffects: true
 AutoSave: true
 UseVault: false
 MakeGlobalCost: 100
 
-WaypointTeleportTime: 0
+WarpstoneTeleportTime: 0
 WarpscrollTeleportTime: 5
 
-WaystoneRecipe:
+WarpstoneRecipe:
   Top: ' S '
   Middle: 'SNS'
   Bottom: ' S '
