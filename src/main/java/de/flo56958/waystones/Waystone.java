@@ -9,9 +9,12 @@ public class Waystone {
 	public int y;
 	public int z;
 	public String Name;
-	public boolean isGlobal;
+	public boolean isGlobal = false;
+	public boolean locked = false;
+
 	//Is the same as for the shulker entity
 	public String uuid;
 	public String owner;
-	public DyeColor color;
+	public DyeColor color = null;
+
 }

@@ -1,10 +1,12 @@
 package de.flo56958.waystones.Listeners;
 
 import de.flo56958.waystones.Main;
+import de.flo56958.waystones.Utilities.ChatWriter;
 import de.flo56958.waystones.Utilities.NBT.NBTUtilitiesReflections;
 import de.flo56958.waystones.Waystone;
 import de.flo56958.waystones.WaystoneManager;
 import de.flo56958.waystones.gui.GUI;
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -144,6 +146,12 @@ public class WaystoneListener implements Listener {
 		} else { //GUI and Teleport options and activation
 			if (!e.getPlayer().hasPermission("waystones.use")) return;
 			WaystoneManager.getInstance().activateWaystone(e.getPlayer(), waystone);
+
+			if (waystone.locked && !(waystone.owner.equals(e.getPlayer().getUniqueId().toString())
+					|| e.getPlayer().hasPermission("waystones.admin"))) {
+				Main.sendActionBar(e.getPlayer(), ChatColor.RED + "Warpstone is locked by Owner!");
+				return;
+			}
 
 			GUI gui = WaystoneManager.getInstance().createGUI(waystone, null, e.getPlayer(), shulker, false);
 

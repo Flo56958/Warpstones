@@ -343,7 +343,6 @@ public class WaystoneManager {
 				Collections.shuffle(wslist);
 				break;
 		}
-
 		int size = wslist.size();
 
 		GUI gui = new GUI();
@@ -355,150 +354,176 @@ public class WaystoneManager {
 		if (isOwner) {
 			customizeGUI = new GUI();
 			GUI.Window window = customizeGUI.addWindow(3, "Customizer - " + waystone.Name);
-
-			//Rename Waypoint
-			ItemStack nameritem = new ItemStack(Material.PAPER);
-			ItemMeta meta = nameritem.getItemMeta();
-			meta.setDisplayName("Rename Waypoint");
-			ArrayList<String> lore = new ArrayList<>();
-			lore.add(ChatColor.WHITE + "Send the Name in Chat!");
-			meta.setLore(lore);
-			nameritem.setItemMeta(meta);
-			GUI.Window.Button namer = window.addButton(2, 1, nameritem);
 			Waystone finalWaystone = waystone;
-			namer.addAction(ClickType.LEFT, new ButtonAction.REQUEST_INPUT(namer, (pl, input) -> {
-				input = input.replaceAll("&", "§");
-				//TODO: Naming Blacklist
-				finalWaystone.Name = input;
-				if (shulker.isCustomNameVisible()) shulker.setCustomName(input);
-			}, ""));
-
-			//Set Waypoint Global
-			ItemStack globalitem = (waystone.isGlobal) ? new ItemStack(Material.GREEN_WOOL) : new ItemStack(Material.RED_WOOL);
-			meta = globalitem.getItemMeta();
-			meta.setDisplayName("Toggle Global Setting");
-			lore = new ArrayList<>();
-			lore.add(ChatColor.WHITE + "Should the waypoint be seen by everyone?");
-			double cost = 0;
-			if (!p.hasPermission("waystones.gobal")) {
-				cost = Main.plugin.getConfig().getDouble("MakeGlobalCost", 100);
-				String scost = "Cost: ";
-				if (Main.useVault) {
-					scost += Main.econ.format(cost);
-				} else {
-					scost += cost + " XP";
-				}
-				boolean canPurchase = canAfford(p, cost);
-				ChatColor color = (canPurchase) ? ChatColor.WHITE : ChatColor.RED;
-
-				lore.add(color + scost);
-				lore.add("The cost is only necessary on activation.");
+			{
+				//Rename Waypoint
+				ItemStack nameritem = new ItemStack(Material.PAPER);
+				ItemMeta meta = nameritem.getItemMeta();
+				meta.setDisplayName("Rename Waypoint");
+				ArrayList<String> lore = new ArrayList<>();
+				lore.add(ChatColor.WHITE + "Send the Name in Chat!");
+				meta.setLore(lore);
+				nameritem.setItemMeta(meta);
+				GUI.Window.Button namer = window.addButton(2, 1, nameritem);
+				namer.addAction(ClickType.LEFT, new ButtonAction.REQUEST_INPUT(namer, (pl, input) -> {
+					input = input.replaceAll("&", "§");
+					//TODO: Naming Blacklist
+					finalWaystone.Name = input;
+					if (shulker.isCustomNameVisible()) shulker.setCustomName(input);
+				}, ""));
 			}
-			meta.setLore(lore);
-			globalitem.setItemMeta(meta);
-			GUI.Window.Button global = window.addButton(4, 1, globalitem);
-			ItemStack finalGlobalitem = global.getItemStack();
-			double finalCost = cost;
-			global.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(global, () -> {
-				if (finalGlobalitem.getType() == Material.RED_WOOL) { //Toggle on
-					finalWaystone.isGlobal = true;
-					WaystoneManager.getInstance().globalWaystones.add(finalWaystone);
-					finalGlobalitem.setType(Material.GREEN_WOOL);
-					withdraw(p, finalCost);
-				} else if (finalGlobalitem.getType() == Material.GREEN_WOOL) { //Toggle off
-					finalWaystone.isGlobal = false;
-					WaystoneManager.getInstance().globalWaystones.remove(finalWaystone);
-					finalGlobalitem.setType(Material.RED_WOOL);
+			{
+				//Set Waypoint Global
+				ItemStack globalitem = (waystone.isGlobal) ? new ItemStack(Material.GREEN_WOOL) : new ItemStack(Material.RED_WOOL);
+				ItemMeta meta = globalitem.getItemMeta();
+				meta.setDisplayName("Toggle Global Setting");
+				List<String> lore = new ArrayList<>();
+				lore.add(ChatColor.WHITE + "Should the waypoint be seen by everyone?");
+				double cost = 0;
+				if (!p.hasPermission("waystones.gobal")) {
+					cost = Main.plugin.getConfig().getDouble("MakeGlobalCost", 100);
+					String scost = "Cost: ";
+					if (Main.useVault) {
+						scost += Main.econ.format(cost);
+					} else {
+						scost += cost + " XP";
+					}
+					boolean canPurchase = canAfford(p, cost);
+					ChatColor color = (canPurchase) ? ChatColor.WHITE : ChatColor.RED;
+
+					lore.add(color + scost);
+					lore.add("The cost is only necessary on activation.");
 				}
-			}));
-
-
-			//Change Waypoint Color
-			ItemStack coloritem = new ItemStack(Material.WHITE_WOOL);
-			meta = coloritem.getItemMeta();
-			meta.setDisplayName("Change Waypoint Color");
-			coloritem.setItemMeta(meta);
-			GUI.Window.Button color = window.addButton(6, 1, coloritem);
-			color.addAction(ClickType.LEFT, new ButtonAction.PAGE_UP(color));
-
-			GUI.Window colorWindow = customizeGUI.addWindow(2, "Choose Color for " + waystone.Name);
-			int index = 0;
-			ArrayList<DyeColor> colors = new ArrayList(Arrays.asList(DyeColor.values()));
-			colors.add(null);
-			for (DyeColor c : colors) {
-				ItemStack col = WaystoneManager.getInstance().getShulkerboxFromColor(c);
-				meta = col.getItemMeta();
-				if (c != null) meta.setDisplayName(c.name());
-				else meta.setDisplayName("NORMAL");
-				col.setItemMeta(meta);
-				GUI.Window.Button but = colorWindow.addButton(index++, col);
-				but.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(but, () -> {
-					shulker.setColor(c);
-					finalWaystone.color = c;
+				meta.setLore(lore);
+				globalitem.setItemMeta(meta);
+				GUI.Window.Button global = window.addButton(4, 1, globalitem);
+				ItemStack finalGlobalitem = global.getItemStack();
+				double finalCost = cost;
+				global.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(global, () -> {
+					if (finalGlobalitem.getType() == Material.RED_WOOL) { //Toggle on
+						finalWaystone.isGlobal = true;
+						WaystoneManager.getInstance().globalWaystones.add(finalWaystone);
+						finalGlobalitem.setType(Material.GREEN_WOOL);
+						withdraw(p, finalCost);
+					} else if (finalGlobalitem.getType() == Material.GREEN_WOOL) { //Toggle off
+						finalWaystone.isGlobal = false;
+						WaystoneManager.getInstance().globalWaystones.remove(finalWaystone);
+						finalGlobalitem.setType(Material.RED_WOOL);
+					}
 				}));
 			}
+			{
+				//Change Waypoint Color
+				ItemStack coloritem = new ItemStack(Material.WHITE_WOOL);
+				ItemMeta meta = coloritem.getItemMeta();
+				meta.setDisplayName("Change Waypoint Color");
+				coloritem.setItemMeta(meta);
+				GUI.Window.Button color = window.addButton(6, 1, coloritem);
+				color.addAction(ClickType.LEFT, new ButtonAction.PAGE_UP(color));
 
-			//Remove Waystone
-			ItemStack removeItem = new ItemStack(Material.BEDROCK);
-			meta = removeItem.getItemMeta();
-			meta.setDisplayName("Remove Waystone");
-			removeItem.setItemMeta(meta);
-			GUI.Window.Button remove = window.addButton(5, 2, removeItem);
-			GUI finalCustomizeGUI = customizeGUI;
-			remove.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(remove, () -> {
-				WaystoneManager.getInstance().removeWaystone(finalWaystone);
-				shulker.getWorld().dropItemNaturally(shulker.getLocation(), Main.waystoneItem);
-				shulker.remove();
-				finalCustomizeGUI.close();
-			}));
-
-			//Transfer Ownership
-			ItemStack owneritem = new ItemStack(Material.BLACK_WOOL);
-			meta = owneritem.getItemMeta();
-			meta.setDisplayName("Transfer Ownership");
-			lore = new ArrayList<>();
-			lore.add(ChatColor.WHITE + "Send the Name of the new Owner in Chat!");
-			meta.setLore(lore);
-			owneritem.setItemMeta(meta);
-			GUI.Window.Button owner = window.addButton(3, 2, owneritem);
-			owner.addAction(ClickType.LEFT, new ButtonAction.REQUEST_INPUT(owner, (pl, input) -> {
-				Player player = Bukkit.getServer().getPlayer(input);
-				if (player == null) {
-					pl.sendMessage(ChatColor.RED + "Player was not found or not online!");
-				} else {
-					if (!player.hasPermission("waystones.place")) {
-						pl.sendMessage(ChatColor.RED + player.getDisplayName() + "does not have the necessary permissions!");
-						return;
+				GUI.Window colorWindow = customizeGUI.addWindow(2, "Choose Color for " + waystone.Name);
+				int index = 0;
+				ArrayList<DyeColor> colors = new ArrayList(Arrays.asList(DyeColor.values()));
+				colors.add(null);
+				for (DyeColor c : colors) {
+					ItemStack col = WaystoneManager.getInstance().getShulkerboxFromColor(c);
+					meta = col.getItemMeta();
+					if (c != null) meta.setDisplayName(c.name());
+					else meta.setDisplayName("NORMAL");
+					col.setItemMeta(meta);
+					GUI.Window.Button but = colorWindow.addButton(index++, col);
+					but.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(but, () -> {
+						shulker.setColor(c);
+						finalWaystone.color = c;
+					}));
+				}
+			}
+			{
+				//Remove Waystone
+				ItemStack removeItem = new ItemStack(Material.BEDROCK);
+				ItemMeta meta = removeItem.getItemMeta();
+				meta.setDisplayName("Remove Waystone");
+				removeItem.setItemMeta(meta);
+				GUI.Window.Button remove = window.addButton(5, 2, removeItem);
+				GUI finalCustomizeGUI = customizeGUI;
+				remove.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(remove, () -> {
+					WaystoneManager.getInstance().removeWaystone(finalWaystone);
+					shulker.getWorld().dropItemNaturally(shulker.getLocation(), Main.waystoneItem);
+					shulker.remove();
+					finalCustomizeGUI.close();
+				}));
+			}
+			{
+				//Transfer Ownership
+				ItemStack owneritem = new ItemStack(Material.BLACK_WOOL);
+				ItemMeta meta = owneritem.getItemMeta();
+				meta.setDisplayName("Transfer Ownership");
+				List<String> lore = new ArrayList<>();
+				lore.add(ChatColor.WHITE + "Send the Name of the new Owner in Chat!");
+				meta.setLore(lore);
+				owneritem.setItemMeta(meta);
+				GUI.Window.Button owner = window.addButton(3, 2, owneritem);
+				owner.addAction(ClickType.LEFT, new ButtonAction.REQUEST_INPUT(owner, (pl, input) -> {
+					Player player = Bukkit.getServer().getPlayer(input);
+					if (player == null) {
+						pl.sendMessage(ChatColor.RED + "Player was not found or not online!");
+					} else {
+						if (!player.hasPermission("waystones.place")) {
+							pl.sendMessage(ChatColor.RED + player.getDisplayName() + "does not have the necessary permissions!");
+							return;
+						}
+						finalWaystone.owner = player.getUniqueId().toString();
+						pl.sendMessage(ChatColor.WHITE + "Transferred successfully to " + input + "!");
+						player.sendMessage(ChatColor.WHITE + "You have been given ownership of the waypoint "
+								+ finalWaystone.Name + " from " + pl.getName() + "!");
+						WaystoneManager.getInstance().activateWaystone(player, finalWaystone);
 					}
-					finalWaystone.owner = player.getUniqueId().toString();
-					pl.sendMessage(ChatColor.WHITE + "Transferred successfully to " + input + "!");
-					player.sendMessage(ChatColor.WHITE + "You have been given ownership of the waypoint "
-							+ finalWaystone.Name + " from " + pl.getName() + "!");
-					WaystoneManager.getInstance().activateWaystone(player, finalWaystone);
-				}
-			}, ""));
-
-			//Show Nametag
-			ItemStack nametagitem = (shulker.isCustomNameVisible()) ? new ItemStack(Material.GREEN_WOOL) : new ItemStack(Material.RED_WOOL);
-			meta = nametagitem.getItemMeta();
-			meta.setDisplayName("Toggle Nametag Visibility");
-			lore = new ArrayList<>();
-			lore.add(ChatColor.WHITE + "Should the waypoint have a Nametag?");
-			meta.setLore(lore);
-			nametagitem.setItemMeta(meta);
-			GUI.Window.Button nametag = window.addButton(4, 0, nametagitem);
-			ItemStack finalNametagItem = nametag.getItemStack();
-			nametag.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(nametag, () -> {
-				if (finalNametagItem.getType() == Material.RED_WOOL) { //Toggle on
-					shulker.setCustomNameVisible(true);
-					shulker.setCustomName(finalWaystone.Name);
-					finalNametagItem.setType(Material.GREEN_WOOL);
-				} else if (finalNametagItem.getType() == Material.GREEN_WOOL) { //Toggle off
-					shulker.setCustomNameVisible(false);
-					shulker.setCustomName(null);
-					finalNametagItem.setType(Material.RED_WOOL);
-				}
-			}));
+				}, ""));
+			}
+			{
+				//Show Nametag
+				ItemStack nametagitem = (shulker.isCustomNameVisible()) ? new ItemStack(Material.GREEN_WOOL) : new ItemStack(Material.RED_WOOL);
+				ItemMeta meta = nametagitem.getItemMeta();
+				meta.setDisplayName("Toggle Nametag Visibility");
+				List<String> lore = new ArrayList<>();
+				lore.add(ChatColor.WHITE + "Should the warpstone have a Nametag?");
+				meta.setLore(lore);
+				nametagitem.setItemMeta(meta);
+				GUI.Window.Button nametag = window.addButton(4, 0, nametagitem);
+				ItemStack finalNametagItem = nametag.getItemStack();
+				nametag.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(nametag, () -> {
+					if (finalNametagItem.getType() == Material.RED_WOOL) { //Toggle on
+						shulker.setCustomNameVisible(true);
+						shulker.setCustomName(finalWaystone.Name);
+						finalNametagItem.setType(Material.GREEN_WOOL);
+					} else if (finalNametagItem.getType() == Material.GREEN_WOOL) { //Toggle off
+						shulker.setCustomNameVisible(false);
+						shulker.setCustomName(null);
+						finalNametagItem.setType(Material.RED_WOOL);
+					}
+				}));
+			}
+			{
+				//Lock Waystone
+				ItemStack lockitem = (waystone.locked) ? new ItemStack(Material.GREEN_WOOL) : new ItemStack(Material.RED_WOOL);
+				ItemMeta meta = lockitem.getItemMeta();
+				meta.setDisplayName("Toggle Locking of Warpstone");
+				List<String> lore = new ArrayList<>();
+				lore.add(ChatColor.WHITE + "Should the Warpstone be inaccessible for everyone?");
+				meta.setLore(lore);
+				lockitem.setItemMeta(meta);
+				GUI.Window.Button lock = window.addButton(0, 2, lockitem);
+				ItemStack finalNametagItem = lock.getItemStack();
+				lock.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(lock, () -> {
+					if (finalNametagItem.getType() == Material.RED_WOOL) { //Toggle on
+						finalNametagItem.setType(Material.GREEN_WOOL);
+						finalWaystone.locked = true;
+					} else if (finalNametagItem.getType() == Material.GREEN_WOOL) { //Toggle off
+						finalNametagItem.setType(Material.RED_WOOL);
+						finalWaystone.locked = true;
+					}
+				}));
+			}
 		}
 
 		//TODO: add option for custom ItemType in Menu
@@ -562,24 +587,30 @@ public class WaystoneManager {
 				double cost = costs.get(item);
 				long distance = distances.get(item);
 				boolean canTeleport = canAfford(p, cost);
-				ChatColor color = (canTeleport) ? ChatColor.WHITE : ChatColor.RED;
 				lore.add(ChatColor.WHITE + "Distance: " + distance + " Blocks");
-				String ec = "XP";
+				String ec = " XP";
 				String c = String.valueOf(Math.round(cost));
 				if (Main.useVault) {
 					ec = "";
 					c = Main.econ.format(cost);
 				}
-				lore.add(color + "Cost to teleport: " + c + " " + ec);
+				lore.add(((canTeleport) ? ChatColor.WHITE : ChatColor.RED) + "Cost to teleport: " + c + ec);
+
+				//check for locked Warpstone
+				if(item.locked && !(item.owner.equals(p.getUniqueId().toString())
+						|| p.hasPermission("waystones.admin"))) {
+					canTeleport = false;
+					lore.add(((item.isGlobal) ? 2 : 1), ChatColor.RED + "" + ChatColor.BOLD + "Locked Warpstone");
+				}
+
 				meta.setLore(lore);
 				stack.setItemMeta(meta);
 
 				GUI.Window.Button but = currentPage.addButton(index, stack);
 				if (canTeleport) {
-					double finalCost = cost;
 					if (waystone != null || listall) {
 						but.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(but, () -> {
-							withdraw(p, finalCost);
+							withdraw(p, cost);
 							Location loc = new Location(Bukkit.getWorld(UUID.fromString(item.worlduuid)), item.x, item.y + 1, item.z);
 							TeleportManager.initTeleportation(p, loc, Main.plugin.getConfig().getInt("WaypointTeleportTime", 0));
 						}));
@@ -588,7 +619,7 @@ public class WaystoneManager {
 							Location location = new Location(Bukkit.getWorld(UUID.fromString(item.worlduuid)), item.x, item.y + 1, item.z);
 							TeleportManager.initTeleportation(p, location, Main.plugin.getConfig().getInt("WarpscrollTeleportTime", 5));
 							if (p.getGameMode() != GameMode.CREATIVE) {
-								withdraw(p, finalCost);
+								withdraw(p, cost);
 								cooldowns.put(p.getUniqueId().toString(), System.currentTimeMillis());
 								if (Main.plugin.getConfig().getBoolean("Warpscroll.RemoveAfterUse", false)) {
 									warpscroll.setAmount(warpscroll.getAmount() - 1);
