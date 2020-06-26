@@ -9,8 +9,10 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,16 +27,16 @@ import java.util.List;
  *
  * @author Flo56958
  */
+@SuppressWarnings("unused")
 public class GUI implements Listener {
 
-	public static List<GUI> guis = Collections.synchronizedList(new ArrayList<>());
-
-	private List<Window> windows = Collections.synchronizedList(new ArrayList<>());
+	private final List<Window> windows = Collections.synchronizedList(new ArrayList<>());
+	private JavaPlugin plugin;
 
 	private volatile boolean isClosed = true;
 
-	public GUI() {
-		guis.add(this);
+	public GUI(JavaPlugin plugin) {
+		this.plugin = plugin;
 		open();
 	}
 
@@ -137,7 +139,8 @@ public class GUI implements Listener {
 			}
 
 			if (!window.getGUI().equals(this)) {
-				throw new IllegalArgumentException("GUI (" + this.hashCode() + ") does not manage Window (" + window.hashCode() + ")!");
+				throw new IllegalArgumentException("GUI (" + this.hashCode()
+						+ ") does not manage Window (" + window.hashCode() + ")!");
 			}
 
 			player.openInventory(window.inventory);
@@ -178,21 +181,40 @@ public class GUI implements Listener {
 				return;
 			}
 
+			isClosed = true;
 			for (Window w : windows) {
 				for (HumanEntity humanEntity : new ArrayList<>(w.getInventory().getViewers())) {
 					//new ArrayList is required as of ModificationException
 					humanEntity.closeInventory();
 				}
+
+				for (GUI.Window.Button button : w.buttonMap) {
+					if (button == null) continue;
+					for (ButtonAction action : button.actions.values()) {
+						if (action instanceof ButtonAction.PAGE_GOTO) {
+							GUI other = ((ButtonAction.PAGE_GOTO) action).window.gui;
+							if (!other.equals(this)) { //Close other GUIs
+								other.close();
+							}
+						}
+					}
+				}
 			}
 
 			HandlerList.unregisterAll(this);
-			isClosed = true;
 		}
 	}
 
 	//<------------------------------------Events------------------------------------------->
 
-	@EventHandler(priority = EventPriority.LOWEST)
+	@EventHandler(ignoreCancelled = true)
+	public void onDisable(PluginDisableEvent event) {
+		if (event.getPlugin().equals(this.plugin)) {
+			this.close();
+		}
+	}
+
+	@EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
 	public void onClick(InventoryClickEvent event) {
 		Window w1 = getWindowFromInventory(event.getClickedInventory());
 		Window w2 = getWindowFromInventory(event.getWhoClicked().getOpenInventory().getTopInventory());
@@ -212,7 +234,7 @@ public class GUI implements Listener {
 		}
 	}
 
-	@EventHandler(priority = EventPriority.LOWEST)
+	@EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
 	public void onDrag(InventoryDragEvent event) {
 		Window w = getWindowFromInventory(event.getInventory());
 
@@ -223,7 +245,7 @@ public class GUI implements Listener {
 		event.setCancelled(true);
 	}
 
-	@EventHandler(priority = EventPriority.LOWEST)
+	@EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
 	public void onMove(InventoryMoveItemEvent event) {
 		Window w1 = getWindowFromInventory(event.getDestination());
 
@@ -236,7 +258,7 @@ public class GUI implements Listener {
 		event.setCancelled(true);
 	}
 
-	@EventHandler(priority = EventPriority.LOWEST)
+	@EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
 	public void onEvent(InventoryInteractEvent event) {
 		Window w = getWindowFromInventory(event.getInventory());
 
@@ -319,11 +341,13 @@ public class GUI implements Listener {
 //         */
 //        @Nullable
 //        public Button getButton(final int x, final int y) {
+//            //TODO: Parameter check
 //            return buttonMap[getSlot(x, y, this)];
 //        }
 //
 //        @Nullable
 //        public Button getButton(final int slot) {
+//            //TODO: Parameter check
 //            return buttonMap[slot];
 //        }
 
@@ -359,7 +383,7 @@ public class GUI implements Listener {
 		public static class Button {
 			private final Window window;
 			private ItemStack item;
-			private EnumMap<ClickType, ButtonAction> actions = new EnumMap<>(ClickType.class);
+			private final EnumMap<ClickType, ButtonAction> actions = new EnumMap<>(ClickType.class);
 
 			/**
 			 * creates a Button with no actions

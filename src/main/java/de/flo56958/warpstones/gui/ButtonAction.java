@@ -76,7 +76,7 @@ public abstract class ButtonAction {
 	public static class PAGE_GOTO extends ButtonAction implements PlayerAction {
 
 		private final int page;
-		private final GUI.Window window;
+		protected final GUI.Window window;
 
 		public PAGE_GOTO(@NotNull GUI.Window.Button button, int page) {
 			super(button);
@@ -127,10 +127,10 @@ public abstract class ButtonAction {
 
 	public static class REQUEST_INPUT extends ButtonAction implements PlayerAction {
 
-		private static ConcurrentHashMap<Player, REQUEST_INPUT> playerToAction = new ConcurrentHashMap<>();
+		private static final ConcurrentHashMap<Player, REQUEST_INPUT> playerToAction = new ConcurrentHashMap<>();
 
-		private PlayerRunnable runnable;
-		private String data;
+		private final PlayerRunnable runnable;
+		private final String data;
 
 		public REQUEST_INPUT(GUI.Window.Button button, PlayerRunnable runnable, String data) {
 			super(button);
@@ -143,6 +143,10 @@ public abstract class ButtonAction {
 			playerToAction.put(player, this);
 			player.sendMessage(ChatColor.RED +  "Your chat input is required!");
 			player.closeInventory();
+		}
+
+		private void afterRun(Player player) {
+			Bukkit.getScheduler().runTaskLater(Main.plugin, () -> button.getWindow().getGUI().show(player, button.getWindow()), 10);
 		}
 	}
 
@@ -159,6 +163,7 @@ public abstract class ButtonAction {
 			event.setCancelled(true);
 
 			ri.runnable.run(event.getPlayer(), event.getMessage());
+			ri.afterRun(event.getPlayer());
 		}
 
 	}

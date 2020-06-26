@@ -1,14 +1,10 @@
 package de.flo56958.warpstones.Listeners;
 
 import de.flo56958.warpstones.Main;
-import de.flo56958.warpstones.Utilities.NBT.NBTUtilitiesReflections;
 import de.flo56958.warpstones.Warpstone;
 import de.flo56958.warpstones.WarpstoneManager;
 import de.flo56958.warpstones.gui.GUI;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Shulker;
@@ -20,6 +16,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.UUID;
 
@@ -34,10 +31,9 @@ public class WarpstoneListener implements Listener {
 		if (stack == null) return;
 		if (!stack.hasItemMeta()) return;
 
-		NBTUtilitiesReflections nbts = new NBTUtilitiesReflections(stack);
-		if (!nbts.hasNBT()) return;
-
-		if (nbts.getInt("Warpstone") != 56958) return;
+		if (!stack.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(Main.plugin, "Warpstone"), PersistentDataType.INTEGER)) {
+			return;
+		}
 
 		if (!e.getPlayer().hasPermission("warpstone.place")) return;
 

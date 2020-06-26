@@ -1,14 +1,15 @@
 package de.flo56958.warpstones.Listeners;
 
 import de.flo56958.warpstones.Main;
-import de.flo56958.warpstones.Utilities.NBT.NBTUtilitiesReflections;
 import de.flo56958.warpstones.WarpstoneManager;
 import de.flo56958.warpstones.gui.GUI;
+import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 
 public class WarpscrollListener implements Listener {
 
@@ -20,10 +21,9 @@ public class WarpscrollListener implements Listener {
 		if (scroll == null) return;
 		if (!scroll.hasItemMeta()) return;
 
-		NBTUtilitiesReflections nbts = new NBTUtilitiesReflections(scroll);
-		if (!nbts.hasNBT()) return;
-
-		if (nbts.getInt("Warpscroll") != 56958) return;
+		if (!scroll.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(Main.plugin, "Warpscroll"), PersistentDataType.INTEGER)) {
+			return;
+		}
 
 		if (!e.getPlayer().hasPermission("warpstones.warpscroll.use")) return;
 

@@ -5,7 +5,6 @@ import de.flo56958.warpstones.Listeners.WarpscrollListener;
 import de.flo56958.warpstones.Listeners.WarpstoneListener;
 import de.flo56958.warpstones.Listeners.WorldSaveListener;
 import de.flo56958.warpstones.Utilities.LanguageManager;
-import de.flo56958.warpstones.Utilities.NBT.NBTUtilitiesReflections;
 import de.flo56958.warpstones.commands.CommandManager;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -19,6 +18,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -38,24 +39,6 @@ public final class Main extends JavaPlugin {
 	public static boolean useVault = false;
 	public static Economy econ = null;
 
-	static {
-		warpstoneItem = new ItemStack(Material.SHULKER_SHELL);
-		ItemMeta meta = warpstoneItem.getItemMeta();
-		meta.setDisplayName("Warpstone");
-		warpstoneItem.setItemMeta(meta);
-		NBTUtilitiesReflections nbts = new NBTUtilitiesReflections(warpstoneItem);
-		nbts.setInt("Warpstone", 56958);
-		NBTUtilitiesReflections.setNBTTagCompound(warpstoneItem, nbts.getNBTTagCompound());
-
-		warpscrollItem = new ItemStack(Material.PAPER);
-		meta = warpscrollItem.getItemMeta();
-		meta.setDisplayName("Warpscroll");
-		warpscrollItem.setItemMeta(meta);
-		nbts = new NBTUtilitiesReflections(warpscrollItem);
-		nbts.setInt("Warpscroll", 56958);
-		NBTUtilitiesReflections.setNBTTagCompound(warpscrollItem, nbts.getNBTTagCompound());
-	}
-
 	@Override
 	public void onEnable() {
 		plugin = this;
@@ -68,6 +51,21 @@ public final class Main extends JavaPlugin {
 		//load config
 		loadConfig();
 		LanguageManager.reload();
+
+		warpstoneItem = new ItemStack(Material.SHULKER_SHELL);
+		ItemMeta meta = warpstoneItem.getItemMeta();
+		meta.setDisplayName("Warpstone");
+		PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
+		persistentDataContainer.set(new NamespacedKey(Main.plugin, "Warpstone"), PersistentDataType.INTEGER, 56958);
+		warpstoneItem.setItemMeta(meta);
+
+
+		warpscrollItem = new ItemStack(Material.PAPER);
+		meta = warpscrollItem.getItemMeta();
+		meta.setDisplayName("Warpscroll");
+		persistentDataContainer = meta.getPersistentDataContainer();
+		persistentDataContainer.set(new NamespacedKey(Main.plugin, "Warpscroll"), PersistentDataType.INTEGER, 56958);
+		warpscrollItem.setItemMeta(meta);
 
 		useVault = setupEconomy();
 		if (useVault) Bukkit.getLogger().log(Level.INFO, "Found and enabled Vault!");
@@ -102,6 +100,7 @@ public final class Main extends JavaPlugin {
 			config.addDefault("Warpscroll.Recipe.Materials", recipeMaterials);
 		}
 		saveConfig();
+		loadConfig();
 		try {
 			NamespacedKey nkey = new NamespacedKey(Main.plugin, "Warpstone");
 			ShapedRecipe newRecipe = new ShapedRecipe(nkey, warpstoneItem);

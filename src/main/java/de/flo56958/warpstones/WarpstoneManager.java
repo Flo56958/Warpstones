@@ -345,14 +345,14 @@ public class WarpstoneManager {
 		}
 		int size = wslist.size();
 
-		GUI gui = new GUI();
+		GUI gui = new GUI(Main.plugin);
 		int windowindex = 1;
 		boolean done = false;
 		boolean isOwner = warpstone != null && (warpstone.owner.equals(p.getUniqueId().toString())
 				|| p.hasPermission("warpstones.admin"));
 		GUI customizeGUI = null;
 		if (isOwner) {
-			customizeGUI = new GUI();
+			customizeGUI = new GUI(Main.plugin);
 			GUI.Window window = customizeGUI.addWindow(3, "Customizer - " + warpstone.Name);
 			Warpstone finalWarpstone = warpstone;
 			{
@@ -520,7 +520,7 @@ public class WarpstoneManager {
 						finalWarpstone.locked = true;
 					} else if (finalNametagItem.getType() == Material.GREEN_WOOL) { //Toggle off
 						finalNametagItem.setType(Material.RED_WOOL);
-						finalWarpstone.locked = true;
+						finalWarpstone.locked = false;
 					}
 				}));
 			}
@@ -611,12 +611,12 @@ public class WarpstoneManager {
 					if (warpstone != null || listall) {
 						but.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(but, () -> {
 							withdraw(p, cost);
-							Location loc = new Location(Bukkit.getWorld(UUID.fromString(item.worlduuid)), item.x, item.y + 1, item.z);
+							Location loc = new Location(Bukkit.getWorld(UUID.fromString(item.worlduuid)), item.x, item.y, item.z);
 							TeleportManager.initTeleportation(p, loc, Main.plugin.getConfig().getInt("WaypointTeleportTime", 0));
 						}));
 					} else {
 						but.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(but, () -> {
-							Location location = new Location(Bukkit.getWorld(UUID.fromString(item.worlduuid)), item.x, item.y + 1, item.z);
+							Location location = new Location(Bukkit.getWorld(UUID.fromString(item.worlduuid)), item.x, item.y, item.z);
 							TeleportManager.initTeleportation(p, location, Main.plugin.getConfig().getInt("WarpscrollTeleportTime", 5));
 							if (p.getGameMode() != GameMode.CREATIVE) {
 								withdraw(p, cost);
@@ -634,6 +634,7 @@ public class WarpstoneManager {
 			if (wslist.isEmpty()) done = true;
 		}
 
+		Bukkit.getScheduler().runTaskLater(Main.plugin, gui::close, 5 * 60 * 20);
 		return gui;
 	}
 }
