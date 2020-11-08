@@ -29,6 +29,9 @@ public class TeleportManager {
 					if (!(newer.getWorld().getName().equals(older.getWorld().getName()) && newer.getBlockX() == older.getBlockX()
 							&& newer.getBlockY() == older.getBlockY() && newer.getBlockZ() == older.getBlockZ())) {
 						Main.sendActionBar(p, "Teleport aborted!");
+
+						// Remove the countdown as the teleport was aborted!
+						WarpstoneManager.cooldowns.remove(p.getUniqueId().toString());
 						return;
 					}
 					if (t == 0) {
