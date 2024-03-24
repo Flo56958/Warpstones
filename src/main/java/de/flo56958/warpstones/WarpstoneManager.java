@@ -1,6 +1,7 @@
 package de.flo56958.warpstones;
 
 import com.google.gson.Gson;
+import de.flo56958.warpstones.Utilities.ChatWriter;
 import de.flo56958.warpstones.Utilities.PlayerInfo;
 import de.flo56958.warpstones.Utilities.SortingType;
 import de.flo56958.warpstones.gui.ButtonAction;
@@ -163,10 +164,10 @@ public class WarpstoneManager {
 			if (warpstone.owner.equals(p.getUniqueId().toString()))
 				return; //owner should always have the warpstone discovered
 			save.warpstones.remove(warpstone.uuid);
-			Main.sendActionBar(p, "Warpstone " + warpstone.Name + " has been undiscovered!");
+			ChatWriter.sendActionBar(p, "Warpstone " + warpstone.Name + " has been undiscovered!");
 		} else {
 			save.warpstones.add(warpstone.uuid);
-			Main.sendActionBar(p, "Warpstone " + warpstone.Name + " has been discovered!");
+			ChatWriter.sendActionBar(p, "Warpstone " + warpstone.Name + " has been discovered!");
 		}
 	}
 
@@ -258,25 +259,12 @@ public class WarpstoneManager {
 
 	private boolean canAfford(Player p, double amount) {
 		if (p.getGameMode() == GameMode.CREATIVE) return true;
-		if (Main.useVault) {
-			if (!Main.econ.has(p, amount)) {
-				return false;
-			}
-		} else {
-			if (PlayerInfo.getPlayerExp(p) < Math.round(amount)) {
-				return false;
-			}
-		}
-		return true;
-	}
+        return PlayerInfo.getPlayerExp(p) >= Math.round(amount);
+    }
 
 	private void withdraw(Player p, double amount) {
 		if (p.getGameMode() == GameMode.CREATIVE) return;
-		if (Main.useVault) {
-			Main.econ.withdrawPlayer(p, amount);
-		} else {
-			p.giveExp(-(int) Math.round(amount));
-		}
+		p.giveExp(-(int) Math.round(amount));
 	}
 
 	public GUI createGUI(Warpstone warpstone, ItemStack warpscroll, Player p, Shulker shulker, boolean listall) {
@@ -383,11 +371,7 @@ public class WarpstoneManager {
 				if (!p.hasPermission("warpstones.gobal")) {
 					cost = Main.plugin.getConfig().getDouble("MakeGlobalCost", 100);
 					String scost = "Cost: ";
-					if (Main.useVault) {
-						scost += Main.econ.format(cost);
-					} else {
-						scost += cost + " XP";
-					}
+					scost += cost + " XP";
 					boolean canPurchase = canAfford(p, cost);
 					ChatColor color = (canPurchase) ? ChatColor.WHITE : ChatColor.RED;
 
@@ -590,10 +574,6 @@ public class WarpstoneManager {
 				lore.add(ChatColor.WHITE + "Distance: " + distance + " Blocks");
 				String ec = " XP";
 				String c = String.valueOf(Math.round(cost));
-				if (Main.useVault) {
-					ec = "";
-					c = Main.econ.format(cost);
-				}
 				lore.add(((canTeleport) ? ChatColor.WHITE : ChatColor.RED) + "Cost to teleport: " + c + ec);
 
 				//check for locked Warpstone
@@ -611,12 +591,12 @@ public class WarpstoneManager {
 					if (warpstone != null || listall) {
 						but.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(but, () -> {
 							withdraw(p, cost);
-							Location loc = new Location(Bukkit.getWorld(UUID.fromString(item.worlduuid)), item.x, item.y, item.z);
+							Location loc = new Location(Bukkit.getWorld(UUID.fromString(item.worlduuid)), item.x, item.y + 1, item.z);
 							TeleportManager.initTeleportation(p, loc, Main.plugin.getConfig().getInt("WaypointTeleportTime", 0));
 						}));
 					} else {
 						but.addAction(ClickType.LEFT, new ButtonAction.RUN_RUNNABLE(but, () -> {
-							Location location = new Location(Bukkit.getWorld(UUID.fromString(item.worlduuid)), item.x, item.y, item.z);
+							Location location = new Location(Bukkit.getWorld(UUID.fromString(item.worlduuid)), item.x, item.y + 1, item.z);
 							TeleportManager.initTeleportation(p, location, Main.plugin.getConfig().getInt("WarpscrollTeleportTime", 5));
 							if (p.getGameMode() != GameMode.CREATIVE) {
 								withdraw(p, cost);

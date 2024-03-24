@@ -1,6 +1,8 @@
 package de.flo56958.warpstones.gui;
 
 import de.flo56958.warpstones.Main;
+import de.flo56958.warpstones.Utilities.ChatWriter;
+import de.flo56958.warpstones.Utilities.LanguageManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -28,24 +30,7 @@ public abstract class ButtonAction {
 		this.button = button;
 	}
 
-	public void run() {
-	}
-
-	public static class NOTHING extends ButtonAction {
-
-		private static NOTHING instance;
-
-		private NOTHING() {
-			super(null);
-		}
-
-		public static NOTHING instance() {
-			synchronized (NOTHING.class) {
-				if (instance == null) instance = new NOTHING();
-			}
-			return instance;
-		}
-	}
+	public void run() {}
 
 	public static class PAGE_UP extends ButtonAction implements PlayerAction {
 
@@ -54,9 +39,9 @@ public abstract class ButtonAction {
 		}
 
 		public void run(Player player) {
-			GUI gui = this.button.getWindow().getGUI();
-			int pageNo = gui.getWindowNumber(this.button.getWindow());
-			gui.show(player, ++pageNo % gui.getWindowAmount());
+			final GUI gui = this.button.getWindow().getGUI();
+			final int pageNo = gui.getWindowNumber(this.button.getWindow()) + 1;
+			gui.show(player, pageNo % gui.getWindowAmount());
 		}
 	}
 
@@ -67,9 +52,13 @@ public abstract class ButtonAction {
 		}
 
 		public void run(Player player) {
-			GUI gui = this.button.getWindow().getGUI();
-			int pageNo = gui.getWindowNumber(this.button.getWindow());
-			gui.show(player, Math.abs(--pageNo) % gui.getWindowAmount());
+			final GUI gui = this.button.getWindow().getGUI();
+			int pageNo = gui.getWindowNumber(this.button.getWindow()) - 1;
+
+			if (pageNo == -1)
+				pageNo = gui.getWindowAmount() - 1;
+
+			gui.show(player, pageNo);
 		}
 	}
 
@@ -78,21 +67,21 @@ public abstract class ButtonAction {
 		private final int page;
 		protected final GUI.Window window;
 
-		public PAGE_GOTO(@NotNull GUI.Window.Button button, int page) {
+		public PAGE_GOTO(@NotNull final GUI.Window.Button button, int page) {
 			super(button);
 			this.page = page;
 			this.window = null;
 		}
 
-		public PAGE_GOTO(@NotNull GUI.Window.Button button, @NotNull GUI.Window window) {
+		public PAGE_GOTO(@NotNull final GUI.Window.Button button, @NotNull final GUI.Window window) {
 			super(button);
 			this.window = window;
 			this.page = -1;
 		}
 
-		public void run(Player player) {
-			GUI gui = (window != null) ? window.getGUI() : button.getWindow().getGUI();
-			int pageNo = (window != null) ? gui.getWindowNumber(window) : page;
+		public void run(@NotNull final Player player) {
+			final GUI gui = (window != null) ? window.getGUI() : button.getWindow().getGUI();
+			final int pageNo = (window != null) ? gui.getWindowNumber(window) : page;
 			gui.show(player, pageNo);
 		}
 	}
@@ -100,7 +89,7 @@ public abstract class ButtonAction {
 	public static class RUN_RUNNABLE extends ButtonAction {
 		private final Runnable runnable;
 
-		public RUN_RUNNABLE(GUI.Window.Button button, Runnable runnable) {
+		public RUN_RUNNABLE(final GUI.Window.Button button, final Runnable runnable) {
 			super(button);
 			this.runnable = runnable;
 		}
@@ -114,7 +103,7 @@ public abstract class ButtonAction {
 	public static class RUN_RUNNABLE_ON_PLAYER extends ButtonAction implements PlayerAction {
 		private final PlayerRunnable runnable;
 
-		public RUN_RUNNABLE_ON_PLAYER(GUI.Window.Button button, PlayerRunnable runnable) {
+		public RUN_RUNNABLE_ON_PLAYER(final GUI.Window.Button button, final PlayerRunnable runnable) {
 			super(button);
 			this.runnable = runnable;
 		}
@@ -132,21 +121,23 @@ public abstract class ButtonAction {
 		private final PlayerRunnable runnable;
 		private final String data;
 
-		public REQUEST_INPUT(GUI.Window.Button button, PlayerRunnable runnable, String data) {
+		public REQUEST_INPUT(final GUI.Window.Button button, final PlayerRunnable runnable, final String data) {
 			super(button);
 			this.runnable = runnable;
 			this.data = data;
 		}
 
 		@Override
-		public void run(Player player) {
+		public void run(@NotNull final Player player) {
 			playerToAction.put(player, this);
-			player.sendMessage(ChatColor.RED +  "Your chat input is required!");
 			player.closeInventory();
+			ChatWriter.sendMessage(player, ChatColor.RED, LanguageManager.getString("GUI.ButtonAction.REQUEST_INPUT")
+					.replace("%data", data + ChatColor.RESET + ChatColor.RED));
 		}
 
-		private void afterRun(Player player) {
-			Bukkit.getScheduler().runTaskLater(Main.plugin, () -> button.getWindow().getGUI().show(player, button.getWindow()), 10);
+		private void afterRun(@NotNull final Player player) {
+			Bukkit.getScheduler().runTaskLater(this.button.getWindow().getGUI().getPlugin(),
+					() -> button.getWindow().getGUI().show(player, button.getWindow()), 10);
 		}
 	}
 
@@ -157,8 +148,8 @@ public abstract class ButtonAction {
 	private static class ChatListener implements Listener {
 
 		@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-		public static void onChat(AsyncPlayerChatEvent event) {
-			REQUEST_INPUT ri = REQUEST_INPUT.playerToAction.remove(event.getPlayer());
+		public static void onChat(@NotNull final AsyncPlayerChatEvent event) {
+			final REQUEST_INPUT ri = REQUEST_INPUT.playerToAction.remove(event.getPlayer());
 			if (ri == null) return;
 			event.setCancelled(true);
 

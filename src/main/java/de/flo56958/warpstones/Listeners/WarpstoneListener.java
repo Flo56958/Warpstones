@@ -1,6 +1,7 @@
 package de.flo56958.warpstones.Listeners;
 
 import de.flo56958.warpstones.Main;
+import de.flo56958.warpstones.Utilities.ChatWriter;
 import de.flo56958.warpstones.Warpstone;
 import de.flo56958.warpstones.WarpstoneManager;
 import de.flo56958.warpstones.gui.GUI;
@@ -39,7 +40,7 @@ public class WarpstoneListener implements Listener {
 
 		//checking if maximum warpstones are reached
 		if (WarpstoneManager.getInstance().warpstones.size() >= Main.plugin.getConfig().getInt("MaximumWarpstones")) {
-			Main.sendActionBar(e.getPlayer(), "Warpstone can't be placed as the maximum amount of Waypoint is reached!");
+			ChatWriter.sendActionBar(e.getPlayer(), "Warpstone can't be placed as the maximum amount of Waypoint is reached!");
 			return;
 		}
 
@@ -74,7 +75,7 @@ public class WarpstoneListener implements Listener {
 		for (Warpstone warpstone : WarpstoneManager.getInstance().warpstones) {
 			if (loc.getWorld().getName().equals(warpstone.Name) && loc.getBlockX() == warpstone.x
 					&& loc.getBlockY() == warpstone.y && loc.getBlockZ() == warpstone.z) {
-				Main.sendActionBar(e.getPlayer(), "Warpstone can't be placed as the space is already occupied!");
+				ChatWriter.sendActionBar(e.getPlayer(), "Warpstone can't be placed as the space is already occupied!");
 				return;
 			}
 		}
@@ -144,7 +145,7 @@ public class WarpstoneListener implements Listener {
 
 			if (warpstone.locked && !(warpstone.owner.equals(e.getPlayer().getUniqueId().toString())
 					|| e.getPlayer().hasPermission("warpstones.admin"))) {
-				Main.sendActionBar(e.getPlayer(), ChatColor.RED + "Warpstone is locked by Owner!");
+				ChatWriter.sendActionBar(e.getPlayer(), ChatColor.RED + "Warpstone is locked by Owner!");
 				return;
 			}
 
@@ -161,16 +162,7 @@ public class WarpstoneListener implements Listener {
 
 		UUID id = e.getEntity().getUniqueId();
 
-		Warpstone toremove = null;
-		for (Warpstone warpstone : WarpstoneManager.getInstance().warpstones) {
-			if (warpstone.uuid.equals(id.toString())) {
-				toremove = warpstone;
-				break;
-			}
-		}
-
-		if (toremove != null) {
-			WarpstoneManager.getInstance().removeWarpstone(toremove);
+		if (WarpstoneManager.getInstance().warpstones.removeIf(warpstone -> warpstone.uuid.equals(id.toString()))) {
 			e.getDrops().clear();
 		}
 	}

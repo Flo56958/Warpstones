@@ -19,14 +19,13 @@ public class CraftingGridListener implements Listener {
 		for (ItemStack is : inv.getMatrix()) {
 			if (is == null) continue;
 			ItemMeta meta = is.getItemMeta();
-			if (meta != null) {
-				PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
-				if (persistentDataContainer.has(new NamespacedKey(Main.plugin, "Warpscroll"), PersistentDataType.INTEGER)
-						|| persistentDataContainer.has(new NamespacedKey(Main.plugin, "Warpstone"), PersistentDataType.INTEGER)) {
-					inv.setResult(null);
-					break;
-				}
+            if (meta == null) continue;
+			PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
+			if (persistentDataContainer.has(new NamespacedKey(Main.plugin, "Warpscroll"), PersistentDataType.INTEGER)
+					|| persistentDataContainer.has(new NamespacedKey(Main.plugin, "Warpstone"), PersistentDataType.INTEGER)) {
+				inv.setResult(null);
+				break;
 			}
-		}
+        }
 	}
 }

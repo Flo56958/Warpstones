@@ -1,5 +1,6 @@
 package de.flo56958.warpstones;
 
+import de.flo56958.warpstones.Utilities.ChatWriter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -28,17 +29,17 @@ public class TeleportManager {
 					Location newer = p.getLocation();
 					if (!(newer.getWorld().getName().equals(older.getWorld().getName()) && newer.getBlockX() == older.getBlockX()
 							&& newer.getBlockY() == older.getBlockY() && newer.getBlockZ() == older.getBlockZ())) {
-						Main.sendActionBar(p, "Teleport aborted!");
+						ChatWriter.sendActionBar(p, "Teleport aborted!");
 
 						// Remove the countdown as the teleport was aborted!
 						WarpstoneManager.cooldowns.remove(p.getUniqueId().toString());
 						return;
 					}
 					if (t == 0) {
-						Main.sendActionBar(p, ""); //Empty String to clear Actionbar
+						ChatWriter.sendActionBar(p, ""); //Empty String to clear Actionbar
 						teleport(p, to);
 					} else {
-						Main.sendActionBar(p, "Teleport in " + t);
+						ChatWriter.sendActionBar(p, "Teleport in " + t);
 						playerCountdown.put(p.getUniqueId().toString(), t - 1);
 						if (Main.plugin.getConfig().getBoolean("EnvironmentEffects", true)) {
 							p.getLocation().getWorld().spawnParticle(Particle.PORTAL, p.getLocation(), (int) (128 * (time - t / (double) time)));

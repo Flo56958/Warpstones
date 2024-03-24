@@ -1,11 +1,17 @@
 package de.flo56958.warpstones.Utilities;
 
+import com.google.common.base.CaseFormat;
 import de.flo56958.warpstones.Main;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,102 +53,177 @@ public class ChatWriter {
 	/**
 	 * Sends a chat message
 	 *
-	 * @param receiver
+	 * @param receiver The receiver of the message
 	 * @param color    The ChatColor after the CHAT_PREFIX
-	 * @param message
+	 * @param message  The content of the message
 	 */
-	public static void sendMessage(CommandSender receiver, ChatColor color, String message) {
+	public static void sendMessage(final CommandSender receiver, final ChatColor color, final String message) {
 		if (Main.plugin.getConfig().getBoolean("chat-messages")) {
 			receiver.sendMessage(CHAT_PREFIX + " " + color + message);
 		}
 	}
 
 	/**
+	 * Logs specific information on MineTinker-Activities (toggleable through config)
+	 *
+	 * @param debug   Is the information a (unnecessary) debug information?
+	 * @param message The content of the message
+	 */
+	public static void log(final boolean debug, final String message) {
+		if (debug) {
+			if (Main.plugin.getConfig().getBoolean("logging.debug")) {
+				Bukkit.getConsoleSender().sendMessage(CHAT_PREFIX + " " + ChatColor.RED + message);
+			}
+		} else {
+			if (Main.plugin.getConfig().getBoolean("logging.standard") || Main.plugin.getConfig().getBoolean("logging.debug")) {
+				Bukkit.getConsoleSender().sendMessage(CHAT_PREFIX + " " + message);
+			}
+		}
+	}
+
+	/**
 	 * Logs severe errors. (not toggleable)
 	 *
-	 * @param message
+	 * @param message The content of the message
 	 */
-	public static void logError(String message) {
+	public static void logError(final String message) {
 		Bukkit.getLogger().log(Level.SEVERE, CHAT_PREFIX + " " + message);
 	}
 
 	/**
 	 * Logs information. (not toggleable)
 	 *
-	 * @param message
+	 * @param message The content of the message
 	 */
-	public static void logInfo(String message) {
+	public static void logInfo(final String message) {
 		Bukkit.getLogger().log(Level.INFO, CHAT_PREFIX + " " + message);
 	}
 
 	/**
 	 * Logs information with the ability to have text color (not toggleable)
 	 *
-	 * @param message
+	 * @param message The content of the message
 	 */
-	public static void logColor(String message) {
+	public static void logColor(final String message) {
 		Bukkit.getConsoleSender().sendMessage(CHAT_PREFIX + " " + message);
 	}
 
-	public static String addColors(@NotNull String input) {
-		input = input.replaceAll("%BLACK%", ChatColor.BLACK.toString());
-		input = input.replaceAll("%DARK_BLUE%", ChatColor.DARK_BLUE.toString());
-		input = input.replaceAll("%DARK_GREEN%", ChatColor.DARK_GREEN.toString());
-		input = input.replaceAll("%DARK_AQUA%", ChatColor.DARK_AQUA.toString());
-		input = input.replaceAll("%DARK_RED%", ChatColor.DARK_RED.toString());
-		input = input.replaceAll("%DARK_PURPLE%", ChatColor.DARK_PURPLE.toString());
-		input = input.replaceAll("%GOLD%", ChatColor.GOLD.toString());
-		input = input.replaceAll("%GRAY%", ChatColor.GRAY.toString());
-		input = input.replaceAll("%DARK_GRAY%", ChatColor.DARK_GRAY.toString());
-		input = input.replaceAll("%BLUE%", ChatColor.BLUE.toString());
-		input = input.replaceAll("%GREEN%", ChatColor.GREEN.toString());
-		input = input.replaceAll("%AQUA%", ChatColor.AQUA.toString());
-		input = input.replaceAll("%RED%", ChatColor.RED.toString());
-		input = input.replaceAll("%LIGHT_PURPLE%", ChatColor.LIGHT_PURPLE.toString());
-		input = input.replaceAll("%YELLOW%", ChatColor.YELLOW.toString());
-		input = input.replaceAll("%WHITE%", ChatColor.WHITE.toString());
-		input = input.replaceAll("%BOLD%", ChatColor.BOLD.toString());
-		input = input.replaceAll("%UNDERLINE%", ChatColor.UNDERLINE.toString());
-		input = input.replaceAll("%ITALIC%", ChatColor.ITALIC.toString());
-		input = input.replaceAll("%STRIKE%", ChatColor.STRIKETHROUGH.toString());
-		input = input.replaceAll("%MAGIC%", ChatColor.MAGIC.toString());
-		input = input.replaceAll("%RESET%", ChatColor.RESET.toString());
+	/**
+	 * Sends a message to the players actionbar
+	 *
+	 * @param player The player to send the message to
+	 * @param message The content of the message
+	 */
+	public static void sendActionBar(final Player player, final String message) {
+		//Extract from the source code of the Actionbar-API (altered)
+		if (!Main.plugin.getConfig().getBoolean("actionbar-messages")) {
+			return;
+		}
 
-		return input;
+		if (player == null || !player.isOnline()) {
+			return; // Player may have logged out, unlikely but possible?
+		}
+
+		try {
+			player.spigot().sendMessage(ChatMessageType.ACTION_BAR,
+					TextComponent.fromLegacyText(message));
+		} catch (NoSuchMethodError e) {
+			ChatWriter.logError("You have Spigot features enabled but don't use Spigot." +
+					"Please turn off actionbar-messages in the main config.");
+		}
 	}
 
-	public static ChatColor getColor(String input) {
+	@NotNull
+	public static String addColors(final @NotNull String input) {
+		return input.replaceAll("%BLACK%", ChatColor.BLACK.toString())
+			.replaceAll("%DARK_BLUE%", ChatColor.DARK_BLUE.toString())
+			.replaceAll("%DARK_GREEN%", ChatColor.DARK_GREEN.toString())
+			.replaceAll("%DARK_AQUA%", ChatColor.DARK_AQUA.toString())
+			.replaceAll("%DARK_RED%", ChatColor.DARK_RED.toString())
+			.replaceAll("%DARK_PURPLE%", ChatColor.DARK_PURPLE.toString())
+			.replaceAll("%GOLD%", ChatColor.GOLD.toString())
+			.replaceAll("%GRAY%", ChatColor.GRAY.toString())
+			.replaceAll("%DARK_GRAY%", ChatColor.DARK_GRAY.toString())
+			.replaceAll("%BLUE%", ChatColor.BLUE.toString())
+			.replaceAll("%GREEN%", ChatColor.GREEN.toString())
+			.replaceAll("%AQUA%", ChatColor.AQUA.toString())
+			.replaceAll("%RED%", ChatColor.RED.toString())
+			.replaceAll("%LIGHT_PURPLE%", ChatColor.LIGHT_PURPLE.toString())
+			.replaceAll("%YELLOW%", ChatColor.YELLOW.toString())
+			.replaceAll("%WHITE%", ChatColor.WHITE.toString())
+			.replaceAll("%BOLD%", ChatColor.BOLD.toString())
+			.replaceAll("%UNDERLINE%", ChatColor.UNDERLINE.toString())
+			.replaceAll("%ITALIC%", ChatColor.ITALIC.toString())
+			.replaceAll("%STRIKE%", ChatColor.STRIKETHROUGH.toString())
+			.replaceAll("%MAGIC%", ChatColor.MAGIC.toString())
+			.replaceAll("%RESET%", ChatColor.RESET.toString());
+	}
+
+	public static ChatColor getColor(final @NotNull String input)
+			throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
 		return ChatColor.valueOf(input.split("%")[1]);
 	}
 
-	public static List<String> splitString(String msg, int lineSize) {
-		if (msg == null) return new ArrayList<>();
-		List<String> res = new ArrayList<>();
+	public static String toRomanNumerals(final int number) {
+		if (number == 1337) {
+			return "LEET";
+		}
 
-		String[] str = msg.split(" ");
+		if (number == 0) {
+			return "0"; //Roman Numbers do not have a zero (need to switch to arabic numerals)
+		} else if (number < 0) {
+			return "-" + toRomanNumerals(Math.abs(number)); //So negative numbers get shown correctly and are not 0
+		}
+
+		int floorKey = map.floorKey(number);
+
+		if (number == floorKey) {
+			return map.get(number);
+		}
+
+		return map.get(floorKey) + toRomanNumerals(number - floorKey);
+	}
+
+	@NotNull
+	@Contract("null, _ -> new")
+	public static List<String> splitString(@Nullable final String msg, final int lineSize) {
+		if (msg == null) return new ArrayList<>();
+		final List<String> res = new ArrayList<>();
+
+		final String[] str = msg.split(" ");
 		int index = 0;
 		while (index < str.length) {
-			StringBuilder line = new StringBuilder();
+			final StringBuilder line = new StringBuilder();
 			do {
 				index++;
 				line.append(str[index - 1]);
 				line.append(" ");
 			} while (index < str.length && line.length() + str[index].length() < lineSize);
-			res.add(ChatColor.WHITE + line.toString().substring(0, line.length() - 1));
+			res.add(ChatColor.WHITE + line.substring(0, line.length() - 1));
 		}
 
 		return res;
 	}
 
-	public static String getDisplayName(ItemStack tool) {
-		String name;
-
+	public static String getDisplayName(final @NotNull ItemStack tool) {
 		if (tool.getItemMeta() == null || !tool.getItemMeta().hasDisplayName()) {
-			name = tool.getType().toString();
-		} else {
-			name = tool.getItemMeta().getDisplayName();
-		}
+			String type = tool.getType().toString();
 
-		return name;
+			return toCamel(type);
+		} else {
+			return tool.getItemMeta().getDisplayName();
+		}
+	}
+
+	public static String toCamel(final @NotNull String input) {
+		String output = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, input);
+		// https://stackoverflow.com/a/2560017
+		output = output.replaceAll(String.format("%s|%s|%s",
+						"(?<=[A-Z])(?=[A-Z][a-z])",
+						"(?<=[^A-Z])(?=[A-Z])",
+						"(?<=[A-Za-z])(?=[^A-Za-z])"
+				),
+				" ");
+		return output;
 	}
 }

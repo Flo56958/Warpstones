@@ -1,6 +1,7 @@
 package de.flo56958.warpstones.Listeners;
 
 import de.flo56958.warpstones.Main;
+import de.flo56958.warpstones.Utilities.ChatWriter;
 import de.flo56958.warpstones.WarpstoneManager;
 import de.flo56958.warpstones.gui.GUI;
 import org.bukkit.NamespacedKey;
@@ -37,7 +38,7 @@ public class WarpscrollListener implements Listener {
 		if (cooldown != null) {
 			long diff = (System.currentTimeMillis() - cooldown) / 1000 - Main.plugin.getConfig().getInt("Warpscroll.Cooldown");
 			if (diff < 0) { //Still on cooldown
-				Main.sendActionBar(e.getPlayer(), "Warpscroll is still on cooldown! " + -diff + " Seconds remain!");
+				ChatWriter.sendActionBar(e.getPlayer(), "Warpscroll is still on cooldown! " + -diff + " Seconds remain!");
 				return;
 			} else {
 				WarpstoneManager.cooldowns.remove(e.getPlayer().getUniqueId().toString());

@@ -6,27 +6,21 @@ import de.flo56958.warpstones.Listeners.WarpstoneListener;
 import de.flo56958.warpstones.Listeners.WorldSaveListener;
 import de.flo56958.warpstones.Utilities.LanguageManager;
 import de.flo56958.warpstones.commands.CommandManager;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 
 public final class Main extends JavaPlugin {
 
@@ -35,9 +29,6 @@ public final class Main extends JavaPlugin {
 	public static ItemStack warpscrollItem;
 
 	//TODO: Player should decide if XP or Vault
-
-	public static boolean useVault = false;
-	public static Economy econ = null;
 
 	@Override
 	public void onEnable() {
@@ -66,9 +57,6 @@ public final class Main extends JavaPlugin {
 		persistentDataContainer = meta.getPersistentDataContainer();
 		persistentDataContainer.set(new NamespacedKey(Main.plugin, "Warpscroll"), PersistentDataType.INTEGER, 56958);
 		warpscrollItem.setItemMeta(meta);
-
-		useVault = setupEconomy();
-		if (useVault) Bukkit.getLogger().log(Level.INFO, "Found and enabled Vault!");
 
 		//Setting up WarpstoneManager
 		WarpstoneManager.getInstance();
@@ -142,30 +130,9 @@ public final class Main extends JavaPlugin {
 		}
 	}
 
-	private boolean setupEconomy() {
-		if (!(getConfig().getBoolean("UseVault", false))) return false;
-		if (getServer().getPluginManager().getPlugin("Vault") == null) {
-			return false;
-		}
-		RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-		if (rsp == null) {
-			return false;
-		}
-		econ = rsp.getProvider();
-		return econ != null;
-	}
-
 	private void loadConfig() {
 		getConfig().options().copyDefaults(true);
 		saveConfig();
-	}
-
-	public static void sendActionBar(Player player, String message) { //Extract from the source code of the Actionbar-API (altered)
-		if (!player.isOnline()) {
-			return; // Player may have logged out, unlikely but possible?
-		}
-
-		player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(message));
 	}
 
 	@Override

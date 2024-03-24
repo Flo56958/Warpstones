@@ -8,7 +8,6 @@ InterdimensionalTravelCost: 500
 MaximumWarpstones: 256
 EnvironmentEffects: true
 AutoSave: true
-UseVault: false
 MakeGlobalCost: 100
 
 WarpstoneTeleportTime: 0
